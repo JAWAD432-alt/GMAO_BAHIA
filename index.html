@@ -275,28 +275,6 @@
         @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}}
         ::-webkit-scrollbar{width:4px;height:4px}
         ::-webkit-scrollbar-thumb{background:var(--g300);border-radius:2px}
-    
-        /* ===== MOBILE FIX - Amélioration affichage mobile ===== */
-        @media (max-width: 768px) {
-            .chip{background:#e0e7ff !important;border:2px solid #818cf8 !important;color:#1e40af !important;font-weight:700 !important;min-width:45px;text-align:center;padding:12px 18px !important;font-size:15px !important}
-            .chip.sel{background:var(--primary) !important;border-color:var(--primary) !important;color:#fff !important}
-            .chips{gap:10px !important}
-            .card{padding:16px !important;margin-bottom:14px !important}
-            .card-title{font-size:16px !important;font-weight:700 !important}
-            .card-head{margin-bottom:12px !important}
-            select,.form-input,textarea{font-size:16px !important;padding:14px !important}
-            .tech-item{padding:14px !important;background:#f0f9ff !important;border:2px solid #38bdf8 !important;border-radius:12px !important}
-            .tech-item .tech-name{font-size:15px !important;font-weight:600 !important;color:#0c4a6e !important}
-            .tech-item.sel{background:#0ea5e9 !important;border-color:#0284c7 !important}
-            .tech-item.sel .tech-name{color:#fff !important}
-            .user-badge{padding:14px !important}
-            .user-badge .name{font-size:16px !important;font-weight:700 !important}
-            .timer-display{font-size:42px !important}
-            .btn-save,.btn-whatsapp{padding:16px !important;font-size:16px !important}
-            .page-title{font-size:22px !important}
-            .card-ico{width:36px !important;height:36px !important;font-size:18px !important}
-        }
-
     </style>
 </head>
 <body>
@@ -321,7 +299,7 @@
                 </div>
                 <div class="remember"><input type="checkbox" id="rememberMe"><label for="rememberMe">Se souvenir de moi</label></div>
                 <button type="submit" class="btn-login" id="btnLogin">Se connecter</button>
-                <div class="login-footer"><a href="#" onclick="showConfig()">⚙️ Configuration serveur</a></div>
+                
             </form>
         </div>
     </div>
@@ -337,7 +315,7 @@
                 <div class="header-btns">
                     <button class="hbtn print" onclick="showPrintModal()">🖨️</button>
                     <button class="hbtn" onclick="refreshData()">🔄</button>
-                    <button class="hbtn" onclick="showConfig()">⚙️</button>
+                    
                     <button class="hbtn danger" onclick="logout()">🚪</button>
                 </div>
             </div>
@@ -575,26 +553,7 @@
     </div>
 
     <!-- Config Modal -->
-    <div class="modal hidden" id="configModal">
-        <div class="modal-box">
-            <div class="modal-head"><h3>⚙️ Configuration</h3><button class="modal-close" onclick="hideConfig()">✕</button></div>
-            <div class="fg"><label>URL Google Apps Script</label><input type="url" class="finput" id="cfgUrl" placeholder="https://script.google.com/..."></div>
-            <div class="fg"><label>Token d'accès</label><input type="text" class="finput" id="cfgToken" placeholder="Votre token secret"></div>
-            <button class="btn btn-primary" onclick="saveConfig()" style="width:100%">💾 Sauvegarder</button>
-        </div>
-    </div>
-
-    <!-- Print Modal -->
-    <div class="modal hidden" id="printModal">
-        <div class="modal-box">
-            <div class="modal-head"><h3>🖨️ Imprimer</h3><button class="modal-close" onclick="hidePrintModal()">✕</button></div>
-            <div style="display:flex;flex-direction:column;gap:10px">
-                <button class="btn btn-primary" onclick="printReport('sig')">📋 Signalements</button>
-                <button class="btn btn-warning" onclick="printReport('bt')">🔧 Bons de Travail</button>
-                <button class="btn btn-purple" onclick="printReport('pdr')">📦 Sorties PDR</button>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Voice Modal -->
     <div class="modal hidden" id="voiceModal">
@@ -644,7 +603,10 @@
 
     // ============ INIT ============
     document.addEventListener('DOMContentLoaded',()=>{
-        localStorage.setItem('bahia_url','https://script.google.com/macros/s/AKfycbzmioxe7UoRfLeIo3fPYmOzw_93n-cxmd8lNw3lJXX4D6qihaOOs0l5Gg-gyTQ11q7e/exec');localStorage.setItem('bahia_token','gmao2024');const saved=localStorage.getItem('bahia_user');
+        // ═══ CONFIG AUTO ═══
+        localStorage.setItem('bahia_url', 'https://script.google.com/macros/s/AKfycbzmioxe7UoRfLeIo3fPYmOzw_93n-cxmd8lNw3lJXX4D6qihaOOs0l5Gg-gyTQ11q7e/exec');
+        localStorage.setItem('bahia_token', 'BAHIA2024SECRET');
+        const saved=localStorage.getItem('bahia_user');
         if(saved){user=JSON.parse(saved);showApp()}
         else document.getElementById('loginPage').style.display='flex';
         initSpeechRecognition();
@@ -1498,37 +1460,12 @@
     function showOverlay(m){document.getElementById('overlayText').textContent=m;document.getElementById('overlay').classList.remove('hidden')}
     function hideOverlay(){document.getElementById('overlay').classList.add('hidden')}
     function formatDate(d){if(!d)return'-';const p=d.split('/');if(p.length===3)return`${p[0]}/${p[1]}`;return d}
-    function showConfig(){document.getElementById('cfgUrl').value=localStorage.getItem('bahia_url')||'';document.getElementById('cfgToken').value=localStorage.getItem('bahia_token')||'';document.getElementById('configModal').classList.remove('hidden')}
-    function hideConfig(){document.getElementById('configModal').classList.add('hidden')}
-    function saveConfig(){const u=document.getElementById('cfgUrl').value.trim(),t=document.getElementById('cfgToken').value.trim();if(u)localStorage.setItem('bahia_url',u);if(t)localStorage.setItem('bahia_token',t);hideConfig();toast('✅ Configuration sauvegardée');if(user)loadData()}
     function showPrintModal(){document.getElementById('printModal').classList.remove('hidden')}
     function hidePrintModal(){document.getElementById('printModal').classList.add('hidden')}
 
     function printReport(type){
         hidePrintModal();
-        let html='<style>body{font-family:Arial,sans-serif;padding:20px}h1{color:#1e40af}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#1e40af;color:#fff}.logo{text-align:center;margin-bottom:20px}.logo img{height:60px}
-        /* ===== MOBILE FIX - Amélioration affichage mobile ===== */
-        @media (max-width: 768px) {
-            .chip{background:#e0e7ff !important;border:2px solid #818cf8 !important;color:#1e40af !important;font-weight:700 !important;min-width:45px;text-align:center;padding:12px 18px !important;font-size:15px !important}
-            .chip.sel{background:var(--primary) !important;border-color:var(--primary) !important;color:#fff !important}
-            .chips{gap:10px !important}
-            .card{padding:16px !important;margin-bottom:14px !important}
-            .card-title{font-size:16px !important;font-weight:700 !important}
-            .card-head{margin-bottom:12px !important}
-            select,.form-input,textarea{font-size:16px !important;padding:14px !important}
-            .tech-item{padding:14px !important;background:#f0f9ff !important;border:2px solid #38bdf8 !important;border-radius:12px !important}
-            .tech-item .tech-name{font-size:15px !important;font-weight:600 !important;color:#0c4a6e !important}
-            .tech-item.sel{background:#0ea5e9 !important;border-color:#0284c7 !important}
-            .tech-item.sel .tech-name{color:#fff !important}
-            .user-badge{padding:14px !important}
-            .user-badge .name{font-size:16px !important;font-weight:700 !important}
-            .timer-display{font-size:42px !important}
-            .btn-save,.btn-whatsapp{padding:16px !important;font-size:16px !important}
-            .page-title{font-size:22px !important}
-            .card-ico{width:36px !important;height:36px !important;font-size:18px !important}
-        }
-
-    </style>';
+        let html='<style>body{font-family:Arial,sans-serif;padding:20px}h1{color:#1e40af}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#1e40af;color:#fff}.logo{text-align:center;margin-bottom:20px}.logo img{height:60px}</style>';
         html+='<div class="logo"><h1>🏭 BAHIA AGADIR - GMAO</h1></div>';
         
         if(type==='sig'){
