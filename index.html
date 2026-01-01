@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3a5f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GMAO PRO USINE">
+    <title>GMAO PRO USINE</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: #ecf0f1; min-height: 100vh; }
+        
+        /* Variables */
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #27ae60;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+
+        /* Login Page */
+        .login-page { min-height: 100vh; background: var(--primary); display: flex; flex-direction: column; }
+        .login-header { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white; }
+        .login-header .icon { font-size: 80px; }
+        .login-header h1 { font-size: 32px; margin-top: 20px; }
+        .login-header p { opacity: 0.8; margin-top: 5px; text-align: center; }
+        .login-header .city { color: var(--secondary); font-weight: 500; }
+        .login-form { background: white; border-radius: 30px 30px 0 0; padding: 40px 30px; }
+        .input-group { display: flex; align-items: center; background: var(--light); border-radius: 10px; padding: 0 15px; margin-bottom: 15px; }
+        .input-group .material-icons { color: var(--gray); margin-right: 10px; }
+        .input-group input { flex: 1; border: none; background: none; padding: 15px 0; font-size: 16px; outline: none; }
+        .login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .login-btn:disabled { opacity: 0.7; }
+        .help-text { text-align: center; color: var(--gray); margin-top: 15px; font-size: 14px; }
+        .version { text-align: center; color: rgba(255,255,255,0.5); padding: 20px; }
+
+        /* App Container */
+        .app { display: none; flex-direction: column; min-height: 100vh; }
+        .app.active { display: flex; }
+
+        /* Header */
+        .header { background: var(--primary); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; font-weight: 500; }
+        .header .material-icons { cursor: pointer; font-size: 28px; }
+
+        /* Sidebar */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; }
+        .sidebar-overlay.active { display: block; }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 85%; max-width: 320px; background: white; z-index: 201; transform: translateX(-100%); transition: transform 0.3s; display: flex; flex-direction: column; }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { background: var(--primary); padding: 30px 20px; color: white; }
+        .sidebar-header .avatar { width: 60px; height: 60px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .sidebar-header .avatar .material-icons { font-size: 36px; }
+        .sidebar-header .name { font-size: 18px; font-weight: 500; }
+        .sidebar-header .role { opacity: 0.8; font-size: 12px; text-transform: uppercase; margin-top: 5px; }
+        .sidebar-menu { flex: 1; overflow-y: auto; padding: 10px 0; }
+        .menu-item { display: flex; align-items: center; padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--light); }
+        .menu-item:hover, .menu-item.active { background: var(--light); }
+        .menu-item.active { border-left: 4px solid var(--primary); }
+        .menu-item .material-icons { color: var(--dark); margin-right: 15px; }
+        .menu-item.active .material-icons { color: var(--primary); }
+        .menu-item span { font-size: 16px; color: var(--dark); }
+        .menu-item.active span { color: var(--primary); font-weight: 500; }
+        .sidebar-logout { padding: 20px; border-top: 1px solid var(--light); }
+        .sidebar-logout button { width: 100%; background: none; border: 1px solid var(--danger); color: var(--danger); padding: 12px; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* Page Content */
+        .page { flex: 1; padding: 20px; display: none; }
+        .page.active { display: block; }
+        .page-title { font-size: 24px; color: var(--dark); margin-bottom: 5px; }
+        .page-subtitle { color: var(--gray); margin-bottom: 20px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 10px; padding: 20px; border-left: 4px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
+        .stat-card .material-icons { font-size: 32px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--dark); margin: 5px 0; }
+        .stat-card .label { font-size: 12px; color: var(--gray); }
+
+        /* Cards */
+        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        .card.alert { border-left: 4px solid var(--danger); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-title { font-size: 16px; font-weight: 500; color: var(--dark); flex: 1; }
+        .card-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .card-desc { font-size: 14px; color: #7f8c8d; margin-bottom: 10px; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .card-date { font-size: 12px; color: var(--gray); }
+
+        /* Badges */
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; color: white; }
+        .badge.critique { background: var(--danger); }
+        .badge.haute { background: #e67e22; }
+        .badge.moyenne { background: var(--warning); }
+        .badge.basse { background: var(--info); }
+        .badge.nouveau { background: var(--danger); }
+        .badge.en_cours { background: var(--warning); }
+        .badge.termine { background: var(--success); }
+        .badge.planifie { background: var(--info); }
+
+        /* Status Badge */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; color: white; }
+
+        /* FAB */
+        .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border: none; border-radius: 50%; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 50; display: flex; align-items: center; justify-content: center; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; align-items: flex-end; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 20px 20px 0 0; width: 100%; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--light); }
+        .modal-header h2 { font-size: 20px; color: var(--dark); }
+        .modal-header .material-icons { cursor: pointer; font-size: 28px; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .modal-footer { display: flex; gap: 10px; padding: 20px; border-top: 1px solid var(--light); }
+
+        /* Form */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 500; color: var(--dark); margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: none; background: var(--light); border-radius: 10px; font-size: 16px; outline: none; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .picker-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .picker-option { padding: 8px 12px; border-radius: 20px; background: var(--light); cursor: pointer; font-size: 13px; }
+        .picker-option.active { background: var(--primary); color: white; }
+
+        /* Buttons */
+        .btn { padding: 15px 20px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-cancel { background: var(--light); color: var(--dark); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 8px 15px; font-size: 12px; }
+
+        /* WhatsApp Button */
+        .whatsapp-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; }
+        .whatsapp-btn .material-icons { color: #25D366; font-size: 28px; }
+
+        /* Filter Bar */
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-btn { padding: 8px 15px; border-radius: 20px; background: white; border: none; cursor: pointer; white-space: nowrap; font-size: 14px; }
+        .filter-btn.active { background: var(--primary); color: white; }
+
+        /* Search Bar */
+        .search-bar { display: flex; align-items: center; background: white; border-radius: 10px; padding: 0 15px; margin-bottom: 15px; }
+        .search-bar .material-icons { color: var(--gray); }
+        .search-bar input { flex: 1; border: none; padding: 12px; font-size: 16px; outline: none; background: none; }
+
+        /* Section */
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 18px; font-weight: 500; color: var(--dark); margin-bottom: 15px; }
+
+        /* Tech Contact */
+        .tech-avatar { width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .tech-avatar .material-icons { color: white; font-size: 28px; }
+        .tech-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .tech-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--light); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Stock */
+        .stock-badge { background: var(--primary); color: white; padding: 6px 12px; border-radius: 15px; font-weight: 700; }
+        .stock-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .alert-text { color: var(--danger); font-size: 13px; margin-top: 5px; }
+
+        /* Energy */
+        .energy-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .energy-card { background: white; border-radius: 10px; padding: 15px; text-align: center; }
+        .energy-card .material-icons { font-size: 36px; }
+        .energy-card .value { font-size: 20px; font-weight: 700; margin: 10px 0 5px; }
+        .energy-card .label { font-size: 12px; color: var(--gray); }
+
+        /* KPI */
+        .kpi-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+        .kpi-label { color: var(--gray); font-size: 14px; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+        .progress-bar { height: 8px; background: var(--light); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); border-radius: 4px; }
+
+        /* Stats Row */
+        .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .stat-box { background: white; border-radius: 10px; padding: 20px; text-align: center; }
+        .stat-box .material-icons { font-size: 28px; }
+        .stat-box .number { font-size: 24px; font-weight: 700; margin: 10px 0 5px; }
+
+        /* Status Dot */
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .status-dot.active { background: var(--success); }
+        .status-dot.inactive { background: var(--danger); }
+        .status-dot.busy { background: var(--warning); }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--gray); }
+
+        /* Action Buttons */
+        .action-buttons { display: flex; gap: 10px; }
+
+        /* Loader */
+        .loader { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 400; align-items: center; justify-content: center; flex-direction: column; }
+        .loader.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 12px 24px; border-radius: 10px; z-index: 500; display: none; }
+        .toast.active { display: block; }
+
+        /* Install Banner */
+        .install-banner { background: var(--primary); color: white; padding: 15px 20px; display: none; align-items: center; justify-content: space-between; }
+        .install-banner.active { display: flex; }
+        .install-banner button { background: white; color: var(--primary); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: var(--gray);">Chargement...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-header">
+            <span class="material-icons icon">factory</span>
+            <h1>GMAO PRO USINE</h1>
+            <p>Gestion de Maintenance</p>
+            <p class="city">Application Mobile</p>
+        </div>
+        <div class="login-form">
+            <div class="input-group">
+                <span class="material-icons">person</span>
+                <input type="text" id="username" placeholder="Nom d'utilisateur">
+            </div>
+            <div class="input-group">
+                <span class="material-icons">lock</span>
+                <input type="password" id="password" placeholder="Mot de passe">
+            </div>
+            <button class="login-btn" onclick="handleLogin()">
+                <span class="material-icons">login</span>
+                Se connecter
+            </button>
+            <p class="help-text">Utilisateurs: admin / tech1 / op1</p>
+        </div>
+        <p class="version">Version 1.0.0</p>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" id="app">
+        <!-- Header -->
+        <div class="header">
+            <span class="material-icons" onclick="toggleSidebar()">menu</span>
+            <h1 id="pageTitle">Tableau de Bord</h1>
+            <span class="material-icons" onclick="refreshData()">refresh</span>
+        </div>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="avatar">
+                    <span class="material-icons">person</span>
+                </div>
+                <div class="name" id="userName">Utilisateur</div>
+                <div class="role" id="userRole">ROLE</div>
+            </div>
+            <div class="sidebar-menu" id="sidebarMenu"></div>
+            <div class="sidebar-logout">
+                <button onclick="handleLogout()">
+                    <span class="material-icons">logout</span>
+                    Déconnexion
+                </button>
+            </div>
+        </div>
+
+        <!-- Pages -->
+        <div class="page active" id="page-dashboard"></div>
+        <div class="page" id="page-anomalies"></div>
+        <div class="page" id="page-bons_travail"></div>
+        <div class="page" id="page-maintenance_corrective"></div>
+        <div class="page" id="page-maintenance_preventive"></div>
+        <div class="page" id="page-equipements"></div>
+        <div class="page" id="page-techniciens"></div>
+        <div class="page" id="page-pieces"></div>
+        <div class="page" id="page-energie"></div>
+        <div class="page" id="page-rapports"></div>
+
+        <!-- FAB -->
+        <button class="fab" id="fab" onclick="openModal()">
+            <span class="material-icons">add</span>
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouveau</h2>
+                <span class="material-icons" onclick="closeModal()">close</span>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+        <span>📱 Installer l'application</span>
+        <button onclick="installApp()">Installer</button>
+    </div>
+
+    <script>
+        // =====================================================
+        // CONFIGURATION
+        // =====================================================
+        const CONFIG = {
+            API_URL: 'https://script.google.com/macros/s/AKfycbyKpak4Hz4FeC5z2lF0MR57o7t9Bs3KsXCfVOGEmrVEHlYrsvl1rJ8Qm14FpCqMSn1e/exec',
+            USINE: "GMAO PRO USINE",
+            VILLE: ''
+        };
+
+        // =====================================================
+        // STATE
+        // =====================================================
+        let currentUser = null;
+        let currentPage = 'dashboard';
+        let data = {
+            anomalies: [],
+            bonsTravail: [],
+            correctifs: [],
+            equipements: [],
+            techniciens: [],
+            pieces: [],
+            preventifs: [],
+            energie: []
+        };
+        let filterStatus = 'tous';
+        let deferredPrompt = null;
+
+        // =====================================================
+        // MENU ITEMS
+        // =====================================================
+        const menuItems = [
+            { id: 'dashboard', icon: 'dashboard', label: 'Tableau de Bord', roles: ['admin', 'technicien', 'operateur'] },
+            { id: 'anomalies', icon: 'warning', label: 'Anomalies', roles: ['admin', 'technicien', 'operateur'] },
+            { id: 'bons_travail', icon: 'assignment', label: 'Bons de Travail', roles: ['admin', 'technicien'] },
+            { id: 'maintenance_corrective', icon: 'build', label: 'Maint. Corrective', roles: ['admin', 'technicien'] },
+            { id: 'maintenance_preventive', icon: 'event', label: 'Maint. Préventive', roles: ['admin', 'technicien'] },
+            { id: 'equipements', icon: 'settings', label: 'Équipements', roles: ['admin', 'technicien'] },
+            { id: 'techniciens', icon: 'engineering', label: 'Techniciens', roles: ['admin'] },
+            { id: 'pieces', icon: 'inventory_2', label: 'Pièces Rechange', roles: ['admin', 'technicien'] },
+            { id: 'energie', icon: 'bolt', label: 'Énergie ISO 50001', roles: ['admin'] },
+            { id: 'rapports', icon: 'bar_chart', label: 'Rapports', roles: ['admin'] }
+        ];
+
+        // =====================================================
+        // API
+        // =====================================================
+        async function apiCall(action, params = {}) {
+            try {
+                const data = encodeURIComponent(JSON.stringify({ action, ...params }));
+                const response = await fetch(`${CONFIG.API_URL}?data=${data}`, {
+                    method: 'GET',
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // =====================================================
+        // AUTH
+        // =====================================================
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                showToast('Veuillez remplir tous les champs');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('login', { username, password });
+            hideLoader();
+
+            if (result.success) {
+                currentUser = result.user;
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                showApp();
+                await loadAllData();
+            } else {
+                showToast('Identifiants incorrects');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('user');
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('app').classList.remove('active');
+            toggleSidebar();
+        }
+
+        function checkSession() {
+            const saved = localStorage.getItem('user');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                showApp();
+                loadAllData();
+            }
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('app').classList.add('active');
+            document.getElementById('userName').textContent = currentUser.nom;
+            document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
+            buildMenu();
+            navigateTo('dashboard');
+        }
+
+        // =====================================================
+        // NAVIGATION
+        // =====================================================
+        function buildMenu() {
+            const menu = document.getElementById('sidebarMenu');
+            const filtered = menuItems.filter(item => item.roles.includes(currentUser.role));
+            
+            menu.innerHTML = filtered.map(item => `
+                <div class="menu-item ${currentPage === item.id ? 'active' : ''}" onclick="navigateTo('${item.id}')">
+                    <span class="material-icons">${item.icon}</span>
+                    <span>${item.label}</span>
+                </div>
+            `).join('');
+        }
+
+        function navigateTo(page) {
+            currentPage = page;
+            filterStatus = 'tous';
+            
+            // Update menu
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.menu-item[onclick="navigateTo('${page}')"]`)?.classList.add('active');
+            
+            // Update pages
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.getElementById(`page-${page}`).classList.add('active');
+            
+            // Update title
+            const item = menuItems.find(m => m.id === page);
+            document.getElementById('pageTitle').textContent = item?.label || 'GMAO';
+            
+            // Show/hide FAB
+            const fabPages = ['anomalies', 'bons_travail', 'maintenance_corrective', 'maintenance_preventive', 'equipements', 'techniciens', 'pieces', 'energie'];
+            document.getElementById('fab').style.display = fabPages.includes(page) ? 'flex' : 'none';
+            
+            // Render page
+            renderPage(page);
+            toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // =====================================================
+        // DATA LOADING
+        // =====================================================
+        async function loadAllData() {
+            showLoader();
+            const [anomalies, bt, correctifs, equipements, techniciens, pieces, preventifs, energie] = await Promise.all([
+                apiCall('getAnomalies'),
+                apiCall('getBonsTravail'),
+                apiCall('getCorrectifs'),
+                apiCall('getEquipements'),
+                apiCall('getTechniciens'),
+                apiCall('getPieces'),
+                apiCall('getPreventifs'),
+                apiCall('getEnergie')
+            ]);
+
+            data = {
+                anomalies: anomalies.data || [],
+                bonsTravail: bt.data || [],
+                correctifs: correctifs.data || [],
+                equipements: equipements.data || [],
+                techniciens: techniciens.data || [],
+                pieces: pieces.data || [],
+                preventifs: preventifs.data || [],
+                energie: energie.data || []
+            };
+
+            hideLoader();
+            renderPage(currentPage);
+        }
+
+        async function refreshData() {
+            await loadAllData();
+            showToast('Données actualisées');
+        }
+
+        // =====================================================
+        // PAGE RENDERERS
+        // =====================================================
+        function renderPage(page) {
+            switch(page) {
+                case 'dashboard': renderDashboard(); break;
+                case 'anomalies': renderAnomalies(); break;
+                case 'bons_travail': renderBonsTravail(); break;
+                case 'maintenance_corrective': renderCorrectifs(); break;
+                case 'maintenance_preventive': renderPreventifs(); break;
+                case 'equipements': renderEquipements(); break;
+                case 'techniciens': renderTechniciens(); break;
+                case 'pieces': renderPieces(); break;
+                case 'energie': renderEnergie(); break;
+                case 'rapports': renderRapports(); break;
+            }
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const stats = {
+                anomalies: data.anomalies.filter(a => a.statut === 'nouveau').length,
+                bt: data.bonsTravail.filter(b => b.statut === 'en_cours').length,
+                correctifs: data.correctifs.filter(c => c.statut === 'en_cours').length,
+                preventifs: data.preventifs.filter(p => p.statut === 'planifie').length,
+                stock: data.pieces.filter(p => p.quantite <= p.seuil_alerte).length,
+                equipements: data.equipements.length
+            };
+
+            document.getElementById('page-dashboard').innerHTML = `
+                <h1 class="page-title">Tableau de Bord</h1>
+                <p class="page-subtitle">${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-left-color: var(--danger)" onclick="navigateTo('anomalies')">
+                        <span class="material-icons" style="color: var(--danger)">warning</span>
+                        <div class="value">${stats.anomalies}</div>
+                        <div class="label">Anomalies</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning)" onclick="navigateTo('bons_travail')">
+                        <span class="material-icons" style="color: var(--warning)">assignment</span>
+                        <div class="value">${stats.bt}</div>
+                        <div class="label">BT en cours</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--info)" onclick="navigateTo('maintenance_corrective')">
+                        <span class="material-icons" style="color: var(--info)">build</span>
+                        <div class="value">${stats.correctifs}</div>
+                        <div class="label">Correctifs</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--success)" onclick="navigateTo('maintenance_preventive')">
+                        <span class="material-icons" style="color: var(--success)">event</span>
+                        <div class="value">${stats.preventifs}</div>
+                        <div class="label">Préventifs</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: #9b59b6" onclick="navigateTo('pieces')">
+                        <span class="material-icons" style="color: #9b59b6">inventory_2</span>
+                        <div class="value">${stats.stock}</div>
+                        <div class="label">Stock alerte</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--primary)" onclick="navigateTo('equipements')">
+                        <span class="material-icons" style="color: var(--primary)">settings</span>
+                        <div class="value">${stats.equipements}</div>
+                        <div class="label">Équipements</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🚨 Dernières anomalies</div>
+                    ${data.anomalies.slice(0, 3).map(a => `
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">${a.titre}</span>
+                                <span class="badge ${a.priorite}">${a.priorite}</span>
+                            </div>
+                            <div class="card-subtitle">${a.equipement}</div>
+                            <span class="badge ${a.statut}">${a.statut.replace('_', ' ')}</span>
+                        </div>
+                    `).join('') || '<p class="empty-state">Aucune anomalie</p>'}
+                </div>
+            `;
+        }
+
+        // Anomalies
+        function renderAnomalies() {
+            const filtered = filterStatus === 'tous' ? data.anomalies : data.anomalies.filter(a => a.statut === filterStatus);
+            
+            document.getElementById('page-anomalies').innerHTML = `
+                <div class="filter-bar">
+                    ${['tous', 'nouveau', 'en_cours', 'termine'].map(s => `
+                        <button class="filter-btn ${filterStatus === s ? 'active' : ''}" onclick="setFilter('${s}')">${s === 'tous' ? 'Tous' : s.replace('_', ' ')}</button>
+                    `).join('')}
+                </div>
+                ${filtered.map(a => `
+                    <div class="card">
+                        <button class="whatsapp-btn" onclick="shareWhatsApp('🚨 ANOMALIE\\n${a.titre}\\n${a.equipement}\\nPriorité: ${a.priorite}')">
+                            <span class="material-icons" style="color: #25D366">share</span>
+                        </button>
+                        <div class="card-header">
+                            <span class="card-title">${a.titre}</span>
+                            <span class="badge ${a.priorite}">${a.priorite}</span>
+                        </div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">settings</span> ${a.equipement}</div>
+                        <div class="card-desc">${a.description || ''}</div>
+                        <div class="card-footer">
+                            <span class="badge ${a.statut}">${a.statut.replace('_', ' ')}</span>
+                            <span class="card-date">${formatDate(a.date)}</span>
+                        </div>
+                    </div>
+                `).join('') || '<p class="empty-state">Aucune anomalie</p>'}
+            `;
+        }
+
+        // Bons de Travail
+        function renderBonsTravail() {
+            const filtered = filterStatus === 'tous' ? data.bonsTravail : data.bonsTravail.filter(b => b.statut === filterStatus);
+            
+            document.getElementById('page-bons_travail').innerHTML = `
+                <div class="filter-bar">
+                    ${['tous', 'nouveau', 'en_cours', 'termine'].map(s => `
+                        <button class="filter-btn ${filterStatus === s ? 'active' : ''}" onclick="setFilter('${s}')">${s === 'tous' ? 'Tous' : s.replace('_', ' ')}</button>
+                    `).join('')}
+                </div>
+                ${filtered.map(b => `
+                    <div class="card">
+                        <div class="card-header">
+                            <span style="color: var(--primary); font-weight: 700">${b.numero}</span>
+                            <span class="badge ${b.priorite || 'moyenne'}">${b.priorite || 'moyenne'}</span>
+                        </div>
+                        <div class="card-title">${b.titre}</div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">settings</span> ${b.equipement}</div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">engineering</span> ${b.technicien || 'Non assigné'}</div>
+                        <div class="card-footer">
+                            <span class="badge ${b.statut}">${b.statut.replace('_', ' ')}</span>
+                            ${b.statut === 'nouveau' ? `<button class="btn btn-warning btn-sm" onclick="updateBTStatus('${b.id}', 'en_cours')">Démarrer</button>` : ''}
+                            ${b.statut === 'en_cours' ? `<button class="btn btn-success btn-sm" onclick="updateBTStatus('${b.id}', 'termine')">Terminer</button>` : ''}
+                        </div>
+                    </div>
+                `).join('') || '<p class="empty-state">Aucun bon de travail</p>'}
+            `;
+        }
+
+        // Correctifs
+        function renderCorrectifs() {
+            document.getElementById('page-maintenance_corrective').innerHTML = `
+                ${data.correctifs.map(c => `
+                    <div class="card">
+                        <div class="card-header">
+                            <span style="color: var(--primary); font-weight: 700">${c.numero}</span>
+                            <span class="badge ${c.statut}">${c.statut.replace('_', ' ')}</span>
+                        </div>
+                        <div class="card-title">${c.titre}</div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">settings</span> ${c.equipement}</div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">engineering</span> ${c.technicien}</div>
+                        ${c.cause ? `<div class="card-subtitle">Cause: ${c.cause}</div>` : ''}
+                        ${c.tempsIntervention ? `<div class="card-subtitle">Durée: ${c.tempsIntervention} min</div>` : ''}
+                        ${c.statut === 'en_cours' ? `<button class="btn btn-success btn-sm" style="margin-top:10px" onclick="terminerCorrectif('${c.id}')">Terminer</button>` : ''}
+                    </div>
+                `).join('') || '<p class="empty-state">Aucune intervention</p>'}
+            `;
+        }
+
+        // Préventifs
+        function renderPreventifs() {
+            document.getElementById('page-maintenance_preventive').innerHTML = `
+                ${data.preventifs.map(p => `
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="material-icons" style="color: var(--success); font-size: 28px">event</span>
+                            <div style="flex:1; margin-left: 10px">
+                                <div class="card-title">${p.titre}</div>
+                                <div class="card-subtitle">${p.equipement}</div>
+                            </div>
+                            <span class="badge ${p.statut}">${p.statut}</span>
+                        </div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">repeat</span> ${p.frequence}</div>
+                        <div class="card-subtitle"><span class="material-icons" style="font-size:14px">event</span> Prochaine: ${p.prochaineMaintenance}</div>
+                    </div>
+                `).join('') || '<p class="empty-state">Aucune maintenance</p>'}
+            `;
+        }
+
+        // Équipements
+        function renderEquipements() {
+            document.getElementById('page-equipements').innerHTML = `
+                <div class="search-bar">
+                    <span class="material-icons">search</span>
+                    <input type="text" placeholder="Rechercher..." oninput="searchEquipements(this.value)">
+                </div>
+                <div id="equipementsList">
+                    ${renderEquipementsList(data.equipements)}
+                </div>
+            `;
+        }
+
+        function renderEquipementsList(items) {
+            return items.map(e => `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icons" style="color: var(--primary); font-size: 28px">settings</span>
+                        <div style="flex:1; margin-left: 10px">
+                            <div class="card-title">${e.nom}</div>
+                            <div class="card-subtitle">Code: ${e.code}</div>
+                        </div>
+                        <div class="status-dot ${e.statut === 'actif' ? 'active' : 'inactive'}"></div>
+                    </div>
+                    <div class="card-subtitle">${e.ligne} - ${e.zone}</div>
+                    <div class="card-subtitle">${e.marque} ${e.modele}</div>
+                </div>
+            `).join('') || '<p class="empty-state">Aucun équipement</p>';
+        }
+
+        function searchEquipements(query) {
+            const filtered = data.equipements.filter(e => 
+                e.nom?.toLowerCase().includes(query.toLowerCase()) || 
+                e.code?.toLowerCase().includes(query.toLowerCase())
+            );
+            document.getElementById('equipementsList').innerHTML = renderEquipementsList(filtered);
+        }
+
+        // Techniciens
+        function renderTechniciens() {
+            document.getElementById('page-techniciens').innerHTML = `
+                ${data.techniciens.map(t => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="tech-avatar"><span class="material-icons">engineering</span></div>
+                            <div style="flex:1; margin-left: 12px">
+                                <div class="card-title">${t.prenom} ${t.nom}</div>
+                                <div class="card-subtitle">${t.specialite}</div>
+                                <div class="card-subtitle">${t.telephone}</div>
+                            </div>
+                            <div class="status-dot ${t.statut === 'disponible' ? 'active' : 'busy'}"></div>
+                        </div>
+                        <div class="tech-actions">
+                            <button class="tech-btn" onclick="window.open('tel:${t.telephone}')">
+                                <span class="material-icons" style="color: var(--primary)">phone</span>
+                            </button>
+                            <button class="tech-btn" onclick="shareWhatsApp('Bonjour ${t.prenom}, ')">
+                                <span class="material-icons" style="color: #25D366">chat</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') || '<p class="empty-state">Aucun technicien</p>'}
+            `;
+        }
+
+        // Pièces
+        function renderPieces() {
+            document.getElementById('page-pieces').innerHTML = `
+                <div class="search-bar">
+                    <span class="material-icons">search</span>
+                    <input type="text" placeholder="Rechercher..." oninput="searchPieces(this.value)">
+                </div>
+                <div id="piecesList">
+                    ${renderPiecesList(data.pieces)}
+                </div>
+            `;
+        }
+
+        function renderPiecesList(items) {
+            return items.map(p => `
+                <div class="card ${p.quantite <= p.seuil_alerte ? 'alert' : ''}">
+                    <div class="card-header">
+                        <span class="material-icons" style="color: ${p.quantite <= p.seuil_alerte ? 'var(--danger)' : 'var(--primary)'}; font-size: 28px">inventory_2</span>
+                        <div style="flex:1; margin-left: 10px">
+                            <div class="card-title">${p.designation}</div>
+                            <div class="card-subtitle">Réf: ${p.reference}</div>
+                        </div>
+                        <div class="stock-badge">${p.quantite}</div>
+                    </div>
+                    ${p.quantite <= p.seuil_alerte ? '<div class="alert-text">⚠️ Stock critique</div>' : ''}
+                    <div class="stock-actions">
+                        <button class="btn btn-success btn-sm" onclick="ajusterStock('${p.id}', 'entree')">+ Entrée</button>
+                        <button class="btn btn-danger btn-sm" onclick="ajusterStock('${p.id}', 'sortie')">- Sortie</button>
+                    </div>
+                </div>
+            `).join('') || '<p class="empty-state">Aucune pièce</p>';
+        }
+
+        function searchPieces(query) {
+            const filtered = data.pieces.filter(p => 
+                p.designation?.toLowerCase().includes(query.toLowerCase()) || 
+                p.reference?.toLowerCase().includes(query.toLowerCase())
+            );
+            document.getElementById('piecesList').innerHTML = renderPiecesList(filtered);
+        }
+
+        // Énergie
+        function renderEnergie() {
+            const dernier = data.energie[0] || {};
+            document.getElementById('page-energie').innerHTML = `
+                <div class="energy-stats">
+                    <div class="energy-card">
+                        <span class="material-icons" style="color: #f1c40f">bolt</span>
+                        <div class="value">${dernier.electricite || 0}</div>
+                        <div class="label">kWh</div>
+                    </div>
+                    <div class="energy-card">
+                        <span class="material-icons" style="color: #3498db">water_drop</span>
+                        <div class="value">${dernier.eau || 0}</div>
+                        <div class="label">m³</div>
+                    </div>
+                    <div class="energy-card">
+                        <span class="material-icons" style="color: #e74c3c">local_fire_department</span>
+                        <div class="value">${dernier.gaz || 0}</div>
+                        <div class="label">m³</div>
+                    </div>
+                </div>
+                <div class="section-title">📊 Historique</div>
+                ${data.energie.map(e => `
+                    <div class="card">
+                        <div class="card-title">${e.date}</div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px">
+                            <span>⚡ ${e.electricite} kWh</span>
+                            <span>💧 ${e.eau} m³</span>
+                            <span>🔥 ${e.gaz} m³</span>
+                        </div>
+                        <div class="card-subtitle" style="margin-top: 5px">Production: ${e.production}</div>
+                    </div>
+                `).join('') || '<p class="empty-state">Aucun relevé</p>'}
+            `;
+        }
+
+        // Rapports
+        function renderRapports() {
+            const total = data.anomalies.length;
+            const resolues = data.anomalies.filter(a => a.statut === 'termine').length;
+            const taux = total > 0 ? Math.round((resolues / total) * 100) : 0;
+
+            document.getElementById('page-rapports').innerHTML = `
+                <h1 class="page-title">📊 Rapports</h1>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Taux résolution anomalies</div>
+                    <div class="kpi-value">${taux}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${taux}%"></div></div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">Bons de Travail terminés</div>
+                    <div class="kpi-value">${data.bonsTravail.filter(b => b.statut === 'termine').length} / ${data.bonsTravail.length}</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">Pièces en alerte</div>
+                    <div class="kpi-value" style="color: var(--danger)">${data.pieces.filter(p => p.quantite <= p.seuil_alerte).length}</div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <span class="material-icons" style="color: var(--danger)">warning</span>
+                        <div class="number">${data.anomalies.length}</div>
+                        <div class="label">Anomalies</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="material-icons" style="color: var(--warning)">assignment</span>
+                        <div class="number">${data.bonsTravail.length}</div>
+                        <div class="label">BT</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="material-icons" style="color: var(--primary)">settings</span>
+                        <div class="number">${data.equipements.length}</div>
+                        <div class="label">Équipements</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="material-icons" style="color: var(--info)">engineering</span>
+                        <div class="number">${data.techniciens.length}</div>
+                        <div class="label">Techniciens</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // =====================================================
+        // FILTER
+        // =====================================================
+        function setFilter(status) {
+            filterStatus = status;
+            renderPage(currentPage);
+        }
+
+        // =====================================================
+        // MODALS
+        // =====================================================
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            
+            switch(currentPage) {
+                case 'anomalies': renderAnomalieForm(); break;
+                case 'bons_travail': renderBTForm(); break;
+                case 'maintenance_corrective': renderCorrectifForm(); break;
+                case 'maintenance_preventive': renderPreventifForm(); break;
+                case 'equipements': renderEquipementForm(); break;
+                case 'techniciens': renderTechnicienForm(); break;
+                case 'pieces': renderPieceForm(); break;
+                case 'energie': renderEnergieForm(); break;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Form Renderers
+        function renderAnomalieForm() {
+            document.getElementById('modalTitle').textContent = 'Signaler Anomalie';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Titre *</label>
+                    <input type="text" id="form-titre" placeholder="Ex: Fuite d'eau...">
+                </div>
+                <div class="form-group">
+                    <label>Équipement *</label>
+                    <input type="text" id="form-equipement" placeholder="Ex: Remplisseuse L2">
+                </div>
+                <div class="form-group">
+                    <label>Ligne</label>
+                    <div class="picker-row">
+                        ${['Ligne 1', 'Ligne 2', 'Ligne 3', 'Ligne 4'].map(l => `
+                            <div class="picker-option" onclick="selectPicker(this, 'form-ligne')">${l}</div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="form-ligne">
+                </div>
+                <div class="form-group">
+                    <label>Priorité</label>
+                    <div class="picker-row">
+                        ${['basse', 'moyenne', 'haute', 'critique'].map(p => `
+                            <div class="picker-option ${p === 'moyenne' ? 'active' : ''}" onclick="selectPicker(this, 'form-priorite')">${p}</div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="form-priorite" value="moyenne">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="form-description" placeholder="Décrivez le problème..."></textarea>
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitAnomalie()">Signaler</button>
+            `;
+        }
+
+        function renderBTForm() {
+            document.getElementById('modalTitle').textContent = 'Nouveau BT';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Titre *</label>
+                    <input type="text" id="form-titre">
+                </div>
+                <div class="form-group">
+                    <label>Équipement *</label>
+                    <input type="text" id="form-equipement">
+                </div>
+                <div class="form-group">
+                    <label>Technicien</label>
+                    <input type="text" id="form-technicien">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="form-description"></textarea>
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitBT()">Créer</button>
+            `;
+        }
+
+        function renderCorrectifForm() {
+            document.getElementById('modalTitle').textContent = 'Nouvelle Intervention';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Titre *</label>
+                    <input type="text" id="form-titre">
+                </div>
+                <div class="form-group">
+                    <label>Équipement *</label>
+                    <input type="text" id="form-equipement">
+                </div>
+                <div class="form-group">
+                    <label>Technicien</label>
+                    <input type="text" id="form-technicien">
+                </div>
+                <div class="form-group">
+                    <label>Cause</label>
+                    <input type="text" id="form-cause">
+                </div>
+                <div class="form-group">
+                    <label>Solution</label>
+                    <textarea id="form-solution"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Temps (min)</label>
+                    <input type="number" id="form-temps">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitCorrectif()">Créer</button>
+            `;
+        }
+
+        function renderPreventifForm() {
+            document.getElementById('modalTitle').textContent = 'Planifier Maintenance';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Titre *</label>
+                    <input type="text" id="form-titre">
+                </div>
+                <div class="form-group">
+                    <label>Équipement *</label>
+                    <input type="text" id="form-equipement">
+                </div>
+                <div class="form-group">
+                    <label>Fréquence</label>
+                    <div class="picker-row">
+                        ${['Quotidienne', 'Hebdomadaire', 'Mensuelle', 'Trimestrielle', 'Annuelle'].map(f => `
+                            <div class="picker-option" onclick="selectPicker(this, 'form-frequence')">${f}</div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="form-frequence">
+                </div>
+                <div class="form-group">
+                    <label>Prochaine maintenance</label>
+                    <input type="date" id="form-prochaine">
+                </div>
+                <div class="form-group">
+                    <label>Technicien</label>
+                    <input type="text" id="form-technicien">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitPreventif()">Planifier</button>
+            `;
+        }
+
+        function renderEquipementForm() {
+            document.getElementById('modalTitle').textContent = 'Nouvel Équipement';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Nom *</label>
+                    <input type="text" id="form-nom">
+                </div>
+                <div class="form-group">
+                    <label>Code *</label>
+                    <input type="text" id="form-code">
+                </div>
+                <div class="form-group">
+                    <label>Ligne</label>
+                    <input type="text" id="form-ligne">
+                </div>
+                <div class="form-group">
+                    <label>Zone</label>
+                    <input type="text" id="form-zone">
+                </div>
+                <div class="form-group">
+                    <label>Marque</label>
+                    <input type="text" id="form-marque">
+                </div>
+                <div class="form-group">
+                    <label>Modèle</label>
+                    <input type="text" id="form-modele">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitEquipement()">Ajouter</button>
+            `;
+        }
+
+        function renderTechnicienForm() {
+            document.getElementById('modalTitle').textContent = 'Nouveau Technicien';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Nom *</label>
+                    <input type="text" id="form-nom">
+                </div>
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input type="text" id="form-prenom">
+                </div>
+                <div class="form-group">
+                    <label>Téléphone *</label>
+                    <input type="tel" id="form-telephone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="form-email">
+                </div>
+                <div class="form-group">
+                    <label>Spécialité</label>
+                    <div class="picker-row">
+                        ${['Mécanique', 'Électrique', 'Automatisme', 'Polyvalent'].map(s => `
+                            <div class="picker-option" onclick="selectPicker(this, 'form-specialite')">${s}</div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="form-specialite">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitTechnicien()">Ajouter</button>
+            `;
+        }
+
+        function renderPieceForm() {
+            document.getElementById('modalTitle').textContent = 'Nouvelle Pièce';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Référence *</label>
+                    <input type="text" id="form-reference">
+                </div>
+                <div class="form-group">
+                    <label>Désignation *</label>
+                    <input type="text" id="form-designation">
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="form-quantite" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Seuil alerte</label>
+                    <input type="number" id="form-seuil" value="5">
+                </div>
+                <div class="form-group">
+                    <label>Emplacement</label>
+                    <input type="text" id="form-emplacement">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitPiece()">Ajouter</button>
+            `;
+        }
+
+        function renderEnergieForm() {
+            document.getElementById('modalTitle').textContent = 'Nouveau Relevé';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="form-date" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label>Électricité (kWh)</label>
+                    <input type="number" id="form-electricite">
+                </div>
+                <div class="form-group">
+                    <label>Eau (m³)</label>
+                    <input type="number" id="form-eau">
+                </div>
+                <div class="form-group">
+                    <label>Gaz (m³)</label>
+                    <input type="number" id="form-gaz">
+                </div>
+                <div class="form-group">
+                    <label>Production</label>
+                    <input type="number" id="form-production">
+                </div>
+            `;
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitEnergie()">Enregistrer</button>
+            `;
+        }
+
+        // =====================================================
+        // FORM SUBMISSIONS
+        // =====================================================
+        async function submitAnomalie() {
+            const data = {
+                titre: document.getElementById('form-titre').value,
+                equipement: document.getElementById('form-equipement').value,
+                ligne: document.getElementById('form-ligne').value,
+                priorite: document.getElementById('form-priorite').value,
+                description: document.getElementById('form-description').value,
+                declarePar: currentUser.nom,
+                date: new Date().toISOString(),
+                statut: 'nouveau'
+            };
+
+            if (!data.titre || !data.equipement) {
+                showToast('Titre et équipement requis');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('createAnomalie', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Anomalie signalée !');
+                
+                if (confirm('Partager sur WhatsApp ?')) {
+                    shareWhatsApp(`🚨 NOUVELLE ANOMALIE\n\n📍 ${data.equipement}\n⚠️ Priorité: ${data.priorite}\n📝 ${data.description}\n👤 Par: ${data.declarePar}`);
+                }
+                
+                await loadAllData();
+            }
+        }
+
+        async function submitBT() {
+            const numero = `BT-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+            const data = {
+                numero,
+                titre: document.getElementById('form-titre').value,
+                equipement: document.getElementById('form-equipement').value,
+                technicien: document.getElementById('form-technicien').value,
+                description: document.getElementById('form-description').value,
+                creePar: currentUser.nom,
+                dateCreation: new Date().toISOString(),
+                statut: 'nouveau'
+            };
+
+            if (!data.titre || !data.equipement) {
+                showToast('Titre et équipement requis');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('createBT', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast(`${numero} créé !`);
+                await loadAllData();
+            }
+        }
+
+        async function submitCorrectif() {
+            const numero = `MC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+            const data = {
+                numero,
+                titre: document.getElementById('form-titre').value,
+                equipement: document.getElementById('form-equipement').value,
+                technicien: document.getElementById('form-technicien').value,
+                cause: document.getElementById('form-cause').value,
+                solution: document.getElementById('form-solution').value,
+                tempsIntervention: document.getElementById('form-temps').value,
+                creePar: currentUser.nom,
+                dateDebut: new Date().toISOString(),
+                statut: 'en_cours'
+            };
+
+            showLoader();
+            const result = await apiCall('createCorrectif', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Intervention créée !');
+                await loadAllData();
+            }
+        }
+
+        async function submitPreventif() {
+            const numero = `MP-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+            const data = {
+                numero,
+                titre: document.getElementById('form-titre').value,
+                equipement: document.getElementById('form-equipement').value,
+                frequence: document.getElementById('form-frequence').value,
+                prochaineMaintenance: document.getElementById('form-prochaine').value,
+                technicien: document.getElementById('form-technicien').value,
+                statut: 'planifie',
+                dateCreation: new Date().toISOString()
+            };
+
+            showLoader();
+            const result = await apiCall('createPreventif', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Maintenance planifiée !');
+                await loadAllData();
+            }
+        }
+
+        async function submitEquipement() {
+            const data = {
+                nom: document.getElementById('form-nom').value,
+                code: document.getElementById('form-code').value,
+                ligne: document.getElementById('form-ligne').value,
+                zone: document.getElementById('form-zone').value,
+                marque: document.getElementById('form-marque').value,
+                modele: document.getElementById('form-modele').value,
+                statut: 'actif'
+            };
+
+            if (!data.nom || !data.code) {
+                showToast('Nom et code requis');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('createEquipement', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Équipement ajouté !');
+                await loadAllData();
+            }
+        }
+
+        async function submitTechnicien() {
+            const data = {
+                nom: document.getElementById('form-nom').value,
+                prenom: document.getElementById('form-prenom').value,
+                telephone: document.getElementById('form-telephone').value,
+                email: document.getElementById('form-email').value,
+                specialite: document.getElementById('form-specialite').value,
+                statut: 'disponible'
+            };
+
+            if (!data.nom || !data.telephone) {
+                showToast('Nom et téléphone requis');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('createTechnicien', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Technicien ajouté !');
+                await loadAllData();
+            }
+        }
+
+        async function submitPiece() {
+            const data = {
+                reference: document.getElementById('form-reference').value,
+                designation: document.getElementById('form-designation').value,
+                quantite: parseInt(document.getElementById('form-quantite').value) || 0,
+                seuil_alerte: parseInt(document.getElementById('form-seuil').value) || 5,
+                emplacement: document.getElementById('form-emplacement').value
+            };
+
+            if (!data.reference || !data.designation) {
+                showToast('Référence et désignation requises');
+                return;
+            }
+
+            showLoader();
+            const result = await apiCall('createPiece', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Pièce ajoutée !');
+                await loadAllData();
+            }
+        }
+
+        async function submitEnergie() {
+            const data = {
+                date: document.getElementById('form-date').value,
+                electricite: document.getElementById('form-electricite').value,
+                eau: document.getElementById('form-eau').value,
+                gaz: document.getElementById('form-gaz').value,
+                production: document.getElementById('form-production').value
+            };
+
+            showLoader();
+            const result = await apiCall('addEnergie', data);
+            hideLoader();
+
+            if (result.success) {
+                closeModal();
+                showToast('Relevé enregistré !');
+                await loadAllData();
+            }
+        }
+
+        // =====================================================
+        // ACTIONS
+        // =====================================================
+        async function updateBTStatus(id, statut) {
+            showLoader();
+            await apiCall('updateBT', { id, statut });
+            hideLoader();
+            showToast('Statut mis à jour');
+            await loadAllData();
+        }
+
+        async function terminerCorrectif(id) {
+            showLoader();
+            await apiCall('updateCorrectif', { id, statut: 'termine', dateFin: new Date().toISOString() });
+            hideLoader();
+            showToast('Intervention terminée');
+            await loadAllData();
+        }
+
+        async function ajusterStock(id, operation) {
+            const qte = prompt(operation === 'entree' ? 'Quantité à ajouter:' : 'Quantité à retirer:');
+            if (qte && !isNaN(qte)) {
+                showLoader();
+                await apiCall('updateStock', { id, qte: parseInt(qte), op: operation });
+                hideLoader();
+                showToast('Stock mis à jour');
+                await loadAllData();
+            }
+        }
+
+        // =====================================================
+        // UTILITIES
+        // =====================================================
+        function selectPicker(el, inputId) {
+            el.parentElement.querySelectorAll('.picker-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(inputId).value = el.textContent;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            return new Date(dateStr).toLocaleDateString('fr-FR');
+        }
+
+        function shareWhatsApp(message) {
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.add('active');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.remove('active');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 3000);
+        }
+
+        // =====================================================
+        // PWA INSTALL
+        // =====================================================
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('active');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').classList.remove('active');
+                });
+            }
+        }
+
+        // =====================================================
+        // INIT
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
