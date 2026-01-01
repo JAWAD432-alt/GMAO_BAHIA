@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GMAO PRO">
+    <title>GMAO PRO USINE</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <style>
+        :root{--primary:#1e40af;--primary-l:#3b82f6;--secondary:#f59e0b;--success:#10b981;--danger:#ef4444;--purple:#8b5cf6;--g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;--g300:#cbd5e1;--g400:#94a3b8;--g500:#64748b;--g600:#475569;--g700:#334155;--g800:#1e293b}
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--g100);min-height:100vh;color:var(--g800)}
+        
+        /* LOGIN */
+        .login-page{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--primary),var(--primary-l))}
+        .login-header{padding:50px 24px 30px;text-align:center;color:#fff}
+        .login-header .logo{font-size:56px;margin-bottom:12px}
+        .login-header h1{font-size:26px;font-weight:700}
+        .login-header p{opacity:.9;font-size:14px;margin-top:6px}
+        .login-box{flex:1;background:#fff;border-radius:28px 28px 0 0;padding:28px 20px}
+        .login-box h2{font-size:20px;margin-bottom:20px}
+        .fg{margin-bottom:16px}
+        .fg label{display:block;font-size:13px;font-weight:600;color:var(--g600);margin-bottom:6px}
+        .inpbox{position:relative}
+        .inpbox .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--g400)}
+        .inpbox input{width:100%;padding:14px 14px 14px 46px;border:2px solid var(--g200);border-radius:12px;font-size:15px;background:var(--g50)}
+        .inpbox input:focus{outline:none;border-color:var(--primary);background:#fff}
+        .btn-login{width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(30,64,175,.3)}
+        .btn-login:disabled{background:var(--g400);box-shadow:none}
+        .login-err{background:#fef2f2;border:1px solid #fecaca;color:var(--danger);padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px;display:none}
+        .login-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--g500)}
+        .version{text-align:center;color:rgba(255,255,255,.5);padding:15px;font-size:12px}
+
+        /* APP */
+        .app{display:none;min-height:100vh;padding-bottom:90px}
+        .app.active{display:block}
+
+        /* HEADER */
+        .header{background:#fff;padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+        .header-row{display:flex;justify-content:space-between;align-items:center}
+        .header-left{display:flex;align-items:center;gap:10px}
+        .avatar{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-l));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}
+        .user-info h1{font-size:15px;font-weight:700}
+        .user-info .role{font-size:12px;color:var(--g500)}
+        .header-btns{display:flex;gap:6px}
+        .hbtn{width:40px;height:40px;border-radius:10px;background:var(--g100);border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .hbtn.danger{background:#fef2f2}
+        .status-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:6px 12px;background:var(--g50);border-radius:8px;font-size:12px;color:var(--g600)}
+        .status-dot{width:8px;height:8px;border-radius:50%}
+        .status-dot.on{background:var(--success)}
+        .status-dot.off{background:var(--danger)}
+
+        /* BOTTOM NAV */
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:6px 8px 20px;display:flex;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.1);z-index:1000}
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;border-radius:12px;background:none;border:none;color:var(--g400);font-size:11px;font-weight:600;cursor:pointer;position:relative}
+        .nav-item .nav-ico{font-size:22px}
+        .nav-item.active{color:var(--primary);background:#eff6ff}
+        .nav-badge{position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+        .nav-badge.hidden{display:none}
+
+        /* PAGES */
+        .page{display:none;padding:16px;padding-bottom:120px}
+        .page.active{display:block}
+        .page-title{font-size:22px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+
+        /* TABS */
+        .tabs{display:flex;gap:0;background:var(--g100);border-radius:14px;padding:4px;margin-bottom:16px}
+        .tab{flex:1;padding:12px 8px;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--g500);cursor:pointer;border-radius:10px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+        .tab.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .tab .tab-ico{font-size:20px}
+        .tab .tab-badge{background:var(--danger);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        /* STATS */
+        .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+        .stat{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,.08);cursor:pointer}
+        .stat .val{font-size:28px;font-weight:700;color:var(--primary)}
+        .stat .lbl{font-size:12px;color:var(--g500);margin-top:2px}
+        .stat.warn .val{color:var(--secondary)}
+        .stat.ok .val{color:var(--success)}
+        .stat.bad .val{color:var(--danger)}
+
+        /* CARDS */
+        .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+        .card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+        .card-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+        .card-ico.blue{background:#dbeafe}
+        .card-ico.orange{background:#fef3c7}
+        .card-ico.green{background:#d1fae5}
+        .card-ico.purple{background:#ede9fe}
+        .card-ico.red{background:#fee2e2}
+        .card-title{font-size:15px;font-weight:700}
+        .card-sub{font-size:12px;color:var(--g500)}
+
+        /* FORMS */
+        .flabel{font-size:13px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block}
+        .fselect,.finput,.ftextarea{width:100%;padding:12px 14px;border:2px solid var(--g200);border-radius:10px;font-size:15px;background:var(--g50);color:var(--g800)}
+        .fselect:focus,.finput:focus,.ftextarea:focus{outline:none;border-color:var(--primary);background:#fff}
+        .fselect{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+        .ftextarea{resize:none;min-height:80px}
+
+        /* TIMER */
+        .timer-card{background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff;padding:16px;border-radius:16px;text-align:center;margin-bottom:16px}
+        .timer-val{font-size:32px;font-weight:700;font-family:monospace}
+        .timer-btns{display:flex;justify-content:center;gap:8px;margin-top:12px}
+        .timer-btn{padding:8px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+        .timer-btn.start{background:#fff;color:var(--danger)}
+        .timer-btn.stop{background:rgba(255,255,255,.2);color:#fff}
+        .timer-btn.reset{background:rgba(255,255,255,.2);color:#fff}
+
+        /* CHIPS */
+        .chips{display:flex;flex-wrap:wrap;gap:8px}
+        .chip{padding:10px 16px;background:var(--g100);border:2px solid var(--g200);border-radius:25px;font-size:14px;font-weight:600;color:var(--g600);cursor:pointer}
+        .chip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+
+        /* TECH GRID */
+        .tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+        .tech-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--g50);border:2px solid var(--g200);border-radius:10px;cursor:pointer}
+        .tech-item.sel{border-color:var(--primary);background:#eff6ff}
+        .tech-item input{width:18px;height:18px;accent-color:var(--primary)}
+        .tech-name{font-size:13px;font-weight:600;flex:1}
+
+        /* DURATION */
+        .dur-row{display:flex;align-items:center;gap:10px}
+        .dur-row .finput{width:100px;text-align:center}
+        .quick-btns{display:flex;gap:6px;margin-top:10px}
+        .qbtn{padding:8px 14px;background:var(--g100);border:none;border-radius:8px;font-weight:600;cursor:pointer}
+
+        /* PHOTO */
+        .photo-btns{display:flex;gap:10px}
+        .photo-btn{flex:1;padding:16px;background:var(--g50);border:2px dashed var(--g300);border-radius:12px;text-align:center;cursor:pointer}
+        .photo-btn .pico{font-size:28px}
+        .photo-btn .plbl{font-size:12px;color:var(--g500);margin-top:4px}
+        .photo-btn input{display:none}
+        .photo-preview{position:relative;margin-top:12px;border-radius:12px;overflow:hidden}
+        .photo-preview img{width:100%;max-height:200px;object-fit:cover}
+        .photo-preview .rm{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:18px;cursor:pointer}
+
+        /* VOICE */
+        .voice-wrap{position:relative}
+        .voice-wrap .ftextarea{padding-right:55px}
+        .voice-btn{position:absolute;right:8px;top:8px;width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,.3)}
+        .voice-btn.recording{animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 15px rgba(239,68,68,0)}}
+
+        /* PREVIEW */
+        .preview{background:var(--g800);color:#fff;padding:14px;border-radius:10px;font-family:monospace;font-size:12px;white-space:pre-wrap;line-height:1.5}
+
+        /* USER BADGE */
+        .user-badge{background:linear-gradient(135deg,var(--primary),var(--primary-l));color:#fff;padding:12px 16px;border-radius:12px;display:flex;align-items:center;gap:10px}
+        .user-badge .ub-ico{font-size:24px}
+        .user-badge .ub-name{font-weight:700;font-size:15px}
+        .user-badge .ub-role{font-size:12px;opacity:.9}
+
+        /* SUCCESS BOX */
+        .success-box{text-align:center;padding:30px;background:#d1fae5;border-radius:16px}
+        .success-box .sico{font-size:50px;margin-bottom:10px}
+        .success-box h3{color:var(--success);margin-bottom:6px}
+        .success-box p{color:var(--g600);font-size:13px}
+        .success-box .sid{font-size:20px;font-weight:700;color:var(--g800);margin-top:10px;font-family:monospace}
+
+        /* LIST */
+        .list-box{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+        .list-item{padding:14px;border-bottom:1px solid var(--g100);cursor:pointer;position:relative}
+        .list-item:last-child{border-bottom:none}
+        .list-item:active{background:var(--g50)}
+        .list-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+        .list-id{font-weight:700;font-size:13px;color:var(--primary)}
+        .list-title{font-weight:600;font-size:14px}
+        .list-sub{font-size:12px;color:var(--g500)}
+
+        /* BADGES */
+        .badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700}
+        .badge.warn{background:#fef3c7;color:#b45309}
+        .badge.ok{background:#d1fae5;color:#059669}
+        .badge.info{background:#e0e7ff;color:#4338ca}
+        .badge.danger{background:#fee2e2;color:#dc2626}
+
+        /* FILTERS */
+        .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+        .fbtn{padding:8px 14px;border:none;background:var(--g100);color:var(--g600);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+        .fbtn.active{background:var(--primary);color:#fff}
+
+        /* SEARCH */
+        .search{position:relative;margin-bottom:12px}
+        .search .sico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--g400)}
+        .search input{width:100%;padding:14px 14px 14px 44px;border:2px solid var(--g200);border-radius:12px;font-size:15px;background:#fff}
+        .search input:focus{outline:none;border-color:var(--primary)}
+
+        /* ACTION BAR */
+        .action-bar{position:fixed;bottom:90px;left:16px;right:16px;display:none;gap:10px;z-index:50}
+        .action-bar.show{display:flex}
+        .action-bar .btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.15)}
+        .action-bar .btn-wa{background:#25D366;color:#fff}
+        .action-bar .btn-save{background:var(--success);color:#fff}
+        .action-bar .btn:disabled{opacity:.5}
+
+        /* EMPTY */
+        .empty{text-align:center;padding:40px 20px;color:var(--g400)}
+        .empty .eico{font-size:40px;margin-bottom:10px}
+
+        /* MODAL */
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-end}
+        .modal.active{display:flex}
+        .modal-content{background:#fff;border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--g100)}
+        .modal-header h2{font-size:18px}
+        .modal-header .close{width:36px;height:36px;background:var(--g100);border:none;border-radius:50%;font-size:20px;cursor:pointer}
+        .modal-body{flex:1;padding:20px;overflow-y:auto}
+        .modal-footer{padding:20px;border-top:1px solid var(--g100);display:flex;gap:12px}
+        .modal-footer .btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+        .modal-footer .btn-cancel{background:var(--g100);color:var(--g700)}
+        .modal-footer .btn-confirm{background:var(--primary);color:#fff}
+
+        /* VOICE MODAL */
+        .voice-modal-body{text-align:center}
+        .lang-btns{display:flex;justify-content:center;gap:10px;margin-bottom:20px}
+        .lang-btn{padding:10px 20px;background:var(--g100);border:2px solid var(--g200);border-radius:20px;font-size:14px;font-weight:600;cursor:pointer}
+        .lang-btn.active{border-color:var(--primary);background:#eff6ff;color:var(--primary)}
+        .record-btn{width:100px;height:100px;background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff;border:none;border-radius:50%;font-size:40px;cursor:pointer;margin:20px auto;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(239,68,68,.4)}
+        .record-btn.recording{animation:pulse 1s infinite;background:linear-gradient(135deg,var(--success),#059669)}
+        .voice-status{font-size:14px;color:var(--g500);margin-bottom:15px}
+        .voice-text{background:var(--g50);border-radius:12px;padding:15px;min-height:80px;font-size:15px;text-align:left;margin-bottom:20px}
+
+        /* LOADER */
+        .loader{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);z-index:3000;display:none;flex-direction:column;align-items:center;justify-content:center}
+        .loader.active{display:flex}
+        .spinner{width:50px;height:50px;border:4px solid var(--g200);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loader p{margin-top:20px;color:var(--g500)}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:4000;display:none;box-shadow:0 4px 15px rgba(0,0,0,.2)}
+        .toast.show{display:block}
+        .toast.error{background:var(--danger)}
+        .toast.success{background:var(--success)}
+
+        .hidden{display:none!important}
+        .mt12{margin-top:12px}
+    </style>
+</head>
+<body>
+    <!-- LOADER -->
+    <div class="loader" id="loader"><div class="spinner"></div><p id="loaderText">Chargement...</p></div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- LOGIN PAGE -->
+    <div class="login-page" id="loginPage">
+        <div class="login-header">
+            <div class="logo">🏭</div>
+            <h1>GMAO PRO USINE</h1>
+            <p>Gestion de Maintenance Assistée</p>
+        </div>
+        <div class="login-box">
+            <h2>Connexion</h2>
+            <div class="login-err" id="loginErr"></div>
+            <div class="fg">
+                <label>Identifiant</label>
+                <div class="inpbox"><span class="ico">👤</span><input type="text" id="loginUser" placeholder="Votre identifiant"></div>
+            </div>
+            <div class="fg">
+                <label>Mot de passe</label>
+                <div class="inpbox"><span class="ico">🔒</span><input type="password" id="loginPwd" placeholder="Votre mot de passe"></div>
+            </div>
+            <button class="btn-login" id="btnLogin" onclick="handleLogin()">🚀 Se connecter</button>
+            <div class="login-footer">Utilisateurs: admin / tech1 / op1</div>
+        </div>
+        <div class="version">Version 2.0.0</div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="app" id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-row">
+                <div class="header-left">
+                    <div class="avatar" id="avatar">A</div>
+                    <div class="user-info"><h1 id="uName">-</h1><div class="role" id="uRole">-</div></div>
+                </div>
+                <div class="header-btns">
+                    <button class="hbtn" onclick="refreshData()">🔄</button>
+                    <button class="hbtn danger" onclick="logout()">🚪</button>
+                </div>
+            </div>
+            <div class="status-row"><span class="status-dot" id="sDot"></span><span id="sText">Connexion...</span></div>
+        </div>
+
+        <!-- PAGE: DASHBOARD -->
+        <div class="page active" id="pgDash">
+            <h2 class="page-title">📊 Tableau de bord</h2>
+            <div class="stats">
+                <div class="stat bad" onclick="goPage('pgSig')"><div class="val" id="stSig">0</div><div class="lbl">Signalements en cours</div></div>
+                <div class="stat warn" onclick="goPage('pgMaint')"><div class="val" id="stBT">0</div><div class="lbl">BT ouverts</div></div>
+                <div class="stat ok" onclick="goPage('pgEquip')"><div class="val" id="stEquip">0</div><div class="lbl">Équipements</div></div>
+                <div class="stat" onclick="goPage('pgStock')"><div class="val" id="stStock">0</div><div class="lbl">Stock alerte</div></div>
+            </div>
+            <div class="card">
+                <div class="card-head"><div class="card-ico orange">📋</div><div><div class="card-title">Derniers BT</div></div></div>
+                <div id="dashBTList"><div class="empty"><div class="eico">🔧</div>Aucun BT</div></div>
+            </div>
+        </div>
+
+        <!-- PAGE: SIGNALEMENT -->
+        <div class="page" id="pgSig">
+            <h2 class="page-title">🚨 Signalement</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchSigTab('nouveau')"><span class="tab-ico">➕</span>Nouveau</button>
+                <button class="tab" onclick="switchSigTab('historique')"><span class="tab-ico">📋</span>Historique<span class="tab-badge" id="sigHistCount">0</span></button>
+            </div>
+            
+            <!-- Tab: Nouveau -->
+            <div id="sigTabNouveau" class="tab-content active">
+                <!-- Timer -->
+                <div class="timer-card">
+                    <div style="font-size:12px;opacity:.9;margin-bottom:4px">⏱️ Temps d'arrêt machine</div>
+                    <div class="timer-val" id="sigTimerVal">00:00:00</div>
+                    <div class="timer-btns">
+                        <button class="timer-btn start" id="sigTimerStart" onclick="startSigTimer()">▶️ Démarrer</button>
+                        <button class="timer-btn stop hidden" id="sigTimerStop" onclick="stopSigTimer()">⏹️ Stop</button>
+                        <button class="timer-btn reset" onclick="resetSigTimer()">↺ Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Steps -->
+                <div class="card" id="sig1"><div class="card-head"><div class="card-ico blue">1</div><div><div class="card-title">Opérateur</div></div></div><div class="user-badge"><div class="ub-ico">👤</div><div class="ub-info"><div class="ub-name" id="sigOpName">-</div><div class="ub-role" id="sigOpRole">-</div></div></div></div>
+                
+                <div class="card" id="sig2"><div class="card-head"><div class="card-ico blue">2</div><div><div class="card-title">Ligne</div></div></div><div class="chips" id="sigLignes"></div></div>
+                
+                <div class="card hidden" id="sig3"><div class="card-head"><div class="card-ico blue">3</div><div><div class="card-title">Machine</div></div></div><div class="chips" id="sigMachines"></div></div>
+                
+                <div class="card hidden" id="sig4"><div class="card-head"><div class="card-ico blue">4</div><div><div class="card-title">Zone</div></div></div><select class="fselect" id="sigZone" onchange="selectSigZone(this.value)"><option value="">-- Sélectionner --</option></select></div>
+                
+                <div class="card hidden" id="sig5"><div class="card-head"><div class="card-ico blue">5</div><div><div class="card-title">Composant</div></div></div><select class="fselect" id="sigComp" onchange="selectSigComp(this.value)"><option value="">-- Sélectionner --</option></select><input type="text" class="finput mt12 hidden" id="sigCompAutre" placeholder="Précisez..."></div>
+                
+                <div class="card hidden" id="sig6"><div class="card-head"><div class="card-ico red">6</div><div><div class="card-title">Anomalie</div></div></div><select class="fselect" id="sigAno" onchange="selectSigAno(this.value)"><option value="">-- Sélectionner --</option></select><input type="text" class="finput mt12 hidden" id="sigAnoAutre" placeholder="Décrivez..."></div>
+                
+                <div class="card hidden" id="sig7"><div class="card-head"><div class="card-ico orange">7</div><div><div class="card-title">Technicien(s)</div></div></div><div class="tech-grid" id="sigTechs"></div><div class="hidden mt12" id="sigSelTechs" style="font-size:12px;color:var(--g600)"></div></div>
+                
+                <div class="card hidden" id="sig8"><div class="card-head"><div class="card-ico green">8</div><div><div class="card-title">Durée (manuel)</div></div></div><div class="dur-row"><input type="number" class="finput" id="sigDuree" min="1" placeholder="0"><span>min</span></div><div class="quick-btns"><button class="qbtn" onclick="setSigDur(5)">5</button><button class="qbtn" onclick="setSigDur(10)">10</button><button class="qbtn" onclick="setSigDur(15)">15</button><button class="qbtn" onclick="setSigDur(30)">30</button><button class="qbtn" onclick="setSigDur(60)">60</button></div></div>
+                
+                <div class="card hidden" id="sig9"><div class="card-head"><div class="card-ico purple">9</div><div><div class="card-title">Photo</div></div></div><div class="photo-btns"><label class="photo-btn" for="sigCam"><div class="pico">📷</div><div class="plbl">Caméra</div></label><label class="photo-btn" for="sigGal"><div class="pico">🖼️</div><div class="plbl">Galerie</div></label></div><input type="file" id="sigCam" accept="image/*" capture="environment" onchange="handleSigPhoto(this)"><input type="file" id="sigGal" accept="image/*" onchange="handleSigPhoto(this)"><div class="photo-preview hidden" id="sigPhotoPreview"><img id="sigPhotoImg" src=""><button class="rm" onclick="removeSigPhoto()">✕</button></div></div>
+                
+                <div class="card hidden" id="sig10"><div class="card-head"><div class="card-ico blue">10</div><div><div class="card-title">Commentaire</div><div class="card-sub">🎤 Cliquez sur le micro pour dicter</div></div></div><div class="voice-wrap"><textarea class="ftextarea" id="sigComment" placeholder="Détails supplémentaires..."></textarea><button class="voice-btn" onclick="openVoiceModal('sigComment')">🎤</button></div></div>
+                
+                <div class="card hidden" id="sigPreviewCard"><div class="card-head"><div class="card-ico green">📋</div><div><div class="card-title">Aperçu</div></div></div><div class="preview" id="sigPreview"></div></div>
+                
+                <div class="success-box hidden" id="sigSuccess"><div class="sico">✅</div><h3>Signalement Enregistré !</h3><p>Un BT a été automatiquement créé</p><div class="sid" id="sigSuccessId">-</div></div>
+                
+                <button class="btn-login mt12 hidden" id="btnResetSig" onclick="resetSig()">↺ Nouveau signalement</button>
+            </div>
+            
+            <!-- Tab: Historique -->
+            <div id="sigTabHistorique" class="tab-content">
+                <div class="filters">
+                    <button class="fbtn active" onclick="filterSigHist(this,'all')">Tous</button>
+                    <button class="fbtn" onclick="filterSigHist(this,'encours')">🔄 En cours</button>
+                    <button class="fbtn" onclick="filterSigHist(this,'cloture')">✅ Clôturés</button>
+                </div>
+                <div class="list-box" id="sigHistList"><div class="empty"><div class="eico">📋</div>Aucun signalement</div></div>
+            </div>
+            
+            <!-- Action Bar -->
+            <div class="action-bar show" id="sigActions">
+                <button class="btn btn-wa" id="btnWaSig" onclick="sendWaSig()" disabled>📤 WhatsApp</button>
+                <button class="btn btn-save" id="btnSaveSig" onclick="saveSig()" disabled>💾 Enregistrer</button>
+            </div>
+        </div>
+
+        <!-- PAGE: MAINTENANCE -->
+        <div class="page" id="pgMaint">
+            <h2 class="page-title">🔧 Maintenance</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchMaintTab('bt')"><span class="tab-ico">📋</span>Bons de Travail<span class="tab-badge" id="btOpenCount">0</span></button>
+                <button class="tab" onclick="switchMaintTab('historique')"><span class="tab-ico">📜</span>Historique</button>
+            </div>
+            <div id="maintTabBT" class="tab-content active">
+                <div class="search"><span class="sico">🔍</span><input type="text" id="searchBT" placeholder="Rechercher..." oninput="filterBTSearch()"></div>
+                <div class="filters">
+                    <button class="fbtn active" onclick="filterBT(this,'all')">Tous</button>
+                    <button class="fbtn" onclick="filterBT(this,'encours')">🔄 En cours</button>
+                    <button class="fbtn" onclick="filterBT(this,'attente')">⏳ Attente</button>
+                </div>
+                <div class="list-box" id="btList"><div class="empty"><div class="eico">🔧</div>Aucun BT ouvert</div></div>
+            </div>
+            <div id="maintTabHistorique" class="tab-content">
+                <div class="list-box" id="btHistList"><div class="empty"><div class="eico">📜</div>Aucun historique</div></div>
+            </div>
+        </div>
+
+        <!-- PAGE: EQUIPEMENTS -->
+        <div class="page" id="pgEquip">
+            <h2 class="page-title">⚙️ Équipements</h2>
+            <div class="search"><span class="sico">🔍</span><input type="text" id="searchEquip" placeholder="Rechercher..." oninput="filterEquip()"></div>
+            <div class="list-box" id="equipList"><div class="empty"><div class="eico">⚙️</div>Aucun équipement</div></div>
+        </div>
+
+        <!-- PAGE: STOCK -->
+        <div class="page" id="pgStock">
+            <h2 class="page-title">📦 Stock PDR</h2>
+            <div class="search"><span class="sico">🔍</span><input type="text" id="searchStock" placeholder="Rechercher..." oninput="filterStock()"></div>
+            <div class="list-box" id="stockList"><div class="empty"><div class="eico">📦</div>Aucune pièce</div></div>
+        </div>
+
+        <!-- PAGE: RAPPORTS -->
+        <div class="page" id="pgRapports">
+            <h2 class="page-title">📊 Rapports</h2>
+            <div class="card">
+                <div class="card-head"><div class="card-ico green">📈</div><div><div class="card-title">Taux de résolution</div></div></div>
+                <div style="text-align:center;padding:20px">
+                    <div style="font-size:48px;font-weight:700;color:var(--success)" id="tauxResol">0%</div>
+                    <div style="background:var(--g200);border-radius:10px;height:12px;margin-top:15px;overflow:hidden"><div id="progressBar" style="background:var(--success);height:100%;width:0%;border-radius:10px;transition:width .5s"></div></div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat bad"><div class="val" id="rapSig">0</div><div class="lbl">Total Signalements</div></div>
+                <div class="stat warn"><div class="val" id="rapBT">0</div><div class="lbl">Total BT</div></div>
+                <div class="stat ok"><div class="val" id="rapEquip">0</div><div class="lbl">Équipements</div></div>
+                <div class="stat"><div class="val" id="rapTech">0</div><div class="lbl">Techniciens</div></div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="goPage('pgDash',this)"><span class="nav-ico">📊</span>Accueil</button>
+            <button class="nav-item" onclick="goPage('pgSig',this)"><span class="nav-ico">🚨</span>Signalement<span class="nav-badge hidden" id="badgeSig">0</span></button>
+            <button class="nav-item" onclick="goPage('pgMaint',this)"><span class="nav-ico">🔧</span>Maintenance<span class="nav-badge hidden" id="badgeBT">0</span></button>
+            <button class="nav-item" onclick="goPage('pgStock',this)"><span class="nav-ico">📦</span>Stock</button>
+            <button class="nav-item" onclick="goPage('pgRapports',this)"><span class="nav-ico">📊</span>Rapports</button>
+        </nav>
+    </div>
+
+    <!-- VOICE MODAL -->
+    <div class="modal" id="voiceModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>🎤 Saisie vocale</h2><button class="close" onclick="closeVoiceModal()">✕</button></div>
+            <div class="modal-body voice-modal-body">
+                <div class="lang-btns">
+                    <button class="lang-btn active" id="langFR" onclick="setVoiceLang('fr-FR')">🇫🇷 Français</button>
+                    <button class="lang-btn" id="langAR" onclick="setVoiceLang('ar-MA')">🇲🇦 العربية</button>
+                </div>
+                <button class="record-btn" id="voiceRecordBtn" onclick="toggleVoiceRecord()">🎤</button>
+                <div class="voice-status" id="voiceStatus">Appuyez pour parler</div>
+                <div class="voice-text" id="voiceText"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeVoiceModal()">Annuler</button>
+                <button class="btn btn-confirm" onclick="confirmVoice()">Valider</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// =====================================================
+// CONFIGURATION
+// =====================================================
+const CONFIG = {
+    API_URL: 'https://script.google.com/macros/s/AKfycbyKpak4Hz4FeC5z2lF0MR57o7t9Bs3KsXCfVOGEmrVEHlYrsvl1rJ8Qm14FpCqMSn1e/exec'
+};
+
+// =====================================================
+// STATE
+// =====================================================
+let user = null;
+let db = { machines: [], zones: [], composants: [], anomalies: [], techniciens: [] };
+let allSig = [], allBT = [], allEquip = [], allPieces = [];
+let sigData = { ligne: '', machine: '', zone: '', comp: '', ano: '', techs: [] };
+let sigPhoto = null, sigPhotoUrl = null;
+let sigTimerInterval = null, sigTimerSeconds = 0;
+let speechRecognition = null, voiceTargetField = null, voiceLang = 'fr-FR', isRecording = false, voiceTranscript = '';
+
+// =====================================================
+// INIT
+// =====================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('gmao_user');
+    if (saved) { user = JSON.parse(saved); showApp(); }
+    else document.getElementById('loginPage').style.display = 'flex';
+    initSpeechRecognition();
+});
+
+// =====================================================
+// API
+// =====================================================
+async function apiCall(action, params = {}) {
+    try {
+        const data = encodeURIComponent(JSON.stringify({ action, ...params }));
+        const response = await fetch(`${CONFIG.API_URL}?data=${data}`, { method: 'GET' });
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// =====================================================
+// AUTH
+// =====================================================
+async function handleLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPwd').value;
+    if (!u || !p) { showLoginErr('Veuillez remplir tous les champs'); return; }
+    
+    document.getElementById('btnLogin').disabled = true;
+    showLoader('Connexion...');
+    
+    const result = await apiCall('login', { username: u, password: p });
+    hideLoader();
+    document.getElementById('btnLogin').disabled = false;
+    
+    if (result.success && result.user) {
+        user = result.user;
+        localStorage.setItem('gmao_user', JSON.stringify(user));
+        showApp();
+    } else {
+        showLoginErr(result.error || 'Identifiants incorrects');
+    }
+}
+
+function showLoginErr(m) { const e = document.getElementById('loginErr'); e.textContent = m; e.style.display = 'block'; }
+function logout() { localStorage.removeItem('gmao_user'); user = null; location.reload(); }
+
+// =====================================================
+// APP
+// =====================================================
+function showApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('uName').textContent = user.nom || user.username;
+    document.getElementById('uRole').textContent = user.role;
+    document.getElementById('avatar').textContent = (user.nom || user.username).charAt(0).toUpperCase();
+    loadData();
+}
+
+async function loadData() {
+    showLoader('Chargement des données...');
+    try {
+        const [machRes, zoneRes, compRes, anoRes, techRes] = await Promise.all([
+            apiCall('getMachines'), apiCall('getZones'), apiCall('getComposants'),
+            apiCall('getTypesAnomalies'), apiCall('getTechniciens')
+        ]);
+        db.machines = machRes.data || [];
+        db.zones = zoneRes.data || [];
+        db.composants = compRes.data || [];
+        db.anomalies = anoRes.data || [];
+        db.techniciens = techRes.data || [];
+        
+        await loadAllData();
+        setStatus(true, 'Connecté');
+        initSig();
+    } catch (e) {
+        console.error(e);
+        setStatus(false, 'Erreur connexion');
+    }
+    hideLoader();
+}
+
+async function loadAllData() {
+    const [sigRes, btRes, equipRes, piecesRes] = await Promise.all([
+        apiCall('getAnomalies'), apiCall('getBonsTravail'),
+        apiCall('getEquipements'), apiCall('getPieces')
+    ]);
+    allSig = sigRes.data || [];
+    allBT = btRes.data || [];
+    allEquip = equipRes.data || [];
+    allPieces = piecesRes.data || [];
+    updateDashboard();
+    updateSigHist();
+    updateBTList();
+    updateEquipList();
+    updateStockList();
+    updateRapports();
+}
+
+async function refreshData() { showLoader('Actualisation...'); await loadAllData(); hideLoader(); toast('🔄 Données actualisées'); }
+function setStatus(on, txt) { document.getElementById('sDot').className = 'status-dot ' + (on ? 'on' : 'off'); document.getElementById('sText').textContent = txt; }
+
+// =====================================================
+// NAVIGATION
+// =====================================================
+function goPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.action-bar').forEach(a => a.classList.remove('show'));
+    document.getElementById(id).classList.add('active');
+    if (el) el.classList.add('active');
+    if (id === 'pgSig') document.getElementById('sigActions').classList.add('show');
+}
+
+// =====================================================
+// DASHBOARD
+// =====================================================
+function updateDashboard() {
+    const sigEnCours = allSig.filter(s => s.statut !== 'termine' && s.statut !== 'Clôturé').length;
+    const btOuverts = allBT.filter(b => b.statut !== 'termine' && b.statut !== 'Clôturé').length;
+    const stockAlerte = allPieces.filter(p => (p.quantite || 0) <= (p.seuil_alerte || 5)).length;
+    
+    document.getElementById('stSig').textContent = sigEnCours;
+    document.getElementById('stBT').textContent = btOuverts;
+    document.getElementById('stEquip').textContent = allEquip.length;
+    document.getElementById('stStock').textContent = stockAlerte;
+    
+    updateBadge('badgeSig', sigEnCours);
+    updateBadge('badgeBT', btOuverts);
+    
+    const recent = allBT.slice(0, 3);
+    if (recent.length > 0) {
+        document.getElementById('dashBTList').innerHTML = recent.map(bt => `
+            <div style="padding:12px 0;border-bottom:1px solid var(--g100)">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-weight:600;color:var(--primary)">🔧 ${bt.numero || bt.id}</span>
+                    <span class="badge ${bt.statut === 'termine' || bt.statut === 'Clôturé' ? 'ok' : 'warn'}">${bt.statut || 'En cours'}</span>
+                </div>
+                <div style="font-size:14px;margin-top:4px">${bt.equipement || bt.machine || '-'}</div>
+            </div>
+        `).join('');
+    }
+}
+
+function updateBadge(id, count) {
+    const badge = document.getElementById(id);
+    if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+    else badge.classList.add('hidden');
+}
+
+// =====================================================
+// SIGNALEMENT
+// =====================================================
+function initSig() {
+    document.getElementById('sigOpName').textContent = user.nom || user.username;
+    document.getElementById('sigOpRole').textContent = user.role;
+    
+    const lignes = [...new Set(db.machines.map(m => m.Ligne || m.ligne))].filter(Boolean);
+    document.getElementById('sigLignes').innerHTML = lignes.map(l => `<div class="chip" onclick="selectSigLigne(this,'${l}')">${l}</div>`).join('');
+    
+    document.getElementById('sigTechs').innerHTML = db.techniciens.map(t => `
+        <div class="tech-item" onclick="toggleSigTech(this,'${t.Nom || t.nom}')">
+            <input type="checkbox"><span class="tech-name">${t.Nom || t.nom}</span>
+        </div>
+    `).join('');
+}
+
+function switchSigTab(tab) {
+    document.querySelectorAll('#pgSig .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#pgSig .tab-content').forEach(c => c.classList.remove('active'));
+    if (tab === 'nouveau') {
+        document.querySelector('#pgSig .tab:first-child').classList.add('active');
+        document.getElementById('sigTabNouveau').classList.add('active');
+        document.getElementById('sigActions').classList.add('show');
+    } else {
+        document.querySelector('#pgSig .tab:last-child').classList.add('active');
+        document.getElementById('sigTabHistorique').classList.add('active');
+        document.getElementById('sigActions').classList.remove('show');
+    }
+}
+
+function selectSigLigne(el, v) {
+    document.querySelectorAll('#sigLignes .chip').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    sigData.ligne = v; sigData.machine = ''; sigData.zone = ''; sigData.comp = '';
+    
+    const machines = db.machines.filter(m => (m.Ligne || m.ligne) === v);
+    document.getElementById('sigMachines').innerHTML = machines.map(m => `<div class="chip" onclick="selectSigMachine(this,'${m.Machine || m.machine}')">${m.Machine || m.machine}</div>`).join('');
+    
+    show(['sig3']); hide(['sig4','sig5','sig6','sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function selectSigMachine(el, v) {
+    document.querySelectorAll('#sigMachines .chip').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    sigData.machine = v; sigData.zone = ''; sigData.comp = '';
+    
+    const zones = db.zones.filter(z => (z.Machine || z.machine) === v);
+    document.getElementById('sigZone').innerHTML = '<option value="">-- Sélectionner --</option>' + zones.map(z => `<option value="${z.Zone || z.zone}">${z.Zone || z.zone}</option>`).join('');
+    
+    show(['sig4']); hide(['sig5','sig6','sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function selectSigZone(v) {
+    sigData.zone = v; sigData.comp = '';
+    
+    const comps = db.composants.filter(c => (c.Zone || c.zone) === v);
+    document.getElementById('sigComp').innerHTML = '<option value="">-- Sélectionner --</option>' + comps.map(c => `<option value="${c.Composant || c.composant}">${c.Composant || c.composant}</option>`).join('') + '<option value="Autre">➕ Autre</option>';
+    
+    show(['sig5']); hide(['sig6','sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function selectSigComp(v) {
+    sigData.comp = v;
+    document.getElementById('sigCompAutre').classList.toggle('hidden', v !== 'Autre');
+    
+    document.getElementById('sigAno').innerHTML = '<option value="">-- Sélectionner --</option>' + db.anomalies.map(a => `<option value="${a.Anomalie || a.anomalie}">${a.Anomalie || a.anomalie}</option>`).join('') + '<option value="Autre">➕ Autre</option>';
+    
+    show(['sig6']); hide(['sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function selectSigAno(v) {
+    sigData.ano = v;
+    document.getElementById('sigAnoAutre').classList.toggle('hidden', v !== 'Autre');
+    show(['sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function toggleSigTech(el, n) {
+    el.classList.toggle('sel');
+    el.querySelector('input').checked = el.classList.contains('sel');
+    if (el.classList.contains('sel')) { if (!sigData.techs.includes(n)) sigData.techs.push(n); }
+    else sigData.techs = sigData.techs.filter(t => t !== n);
+    
+    const d = document.getElementById('sigSelTechs');
+    d.classList.toggle('hidden', !sigData.techs.length);
+    d.innerHTML = 'Sélectionnés: ' + sigData.techs.map(t => `<span class="badge info">${t}</span>`).join(' ');
+    updateSigPreview();
+}
+
+function setSigDur(v) { document.getElementById('sigDuree').value = v; updateSigPreview(); }
+
+function handleSigPhoto(inp) {
+    const f = inp.files[0]; if (!f) return;
+    sigPhoto = f;
+    const r = new FileReader();
+    r.onload = e => { sigPhotoUrl = e.target.result; document.getElementById('sigPhotoImg').src = sigPhotoUrl; document.getElementById('sigPhotoPreview').classList.remove('hidden'); };
+    r.readAsDataURL(f);
+}
+
+function removeSigPhoto() {
+    sigPhoto = sigPhotoUrl = null;
+    document.getElementById('sigPhotoPreview').classList.add('hidden');
+    document.getElementById('sigCam').value = '';
+    document.getElementById('sigGal').value = '';
+}
+
+// Timer
+function startSigTimer() {
+    if (sigTimerInterval) return;
+    document.getElementById('sigTimerStart').classList.add('hidden');
+    document.getElementById('sigTimerStop').classList.remove('hidden');
+    sigTimerInterval = setInterval(() => { sigTimerSeconds++; updateSigTimerDisplay(); }, 1000);
+}
+
+function stopSigTimer() {
+    clearInterval(sigTimerInterval); sigTimerInterval = null;
+    document.getElementById('sigTimerStart').classList.remove('hidden');
+    document.getElementById('sigTimerStop').classList.add('hidden');
+}
+
+function resetSigTimer() { stopSigTimer(); sigTimerSeconds = 0; updateSigTimerDisplay(); }
+
+function updateSigTimerDisplay() {
+    const h = Math.floor(sigTimerSeconds / 3600), m = Math.floor((sigTimerSeconds % 3600) / 60), s = sigTimerSeconds % 60;
+    document.getElementById('sigTimerVal').textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function updateSigPreview() {
+    const comp = sigData.comp === 'Autre' ? document.getElementById('sigCompAutre').value : sigData.comp;
+    const ano = sigData.ano === 'Autre' ? document.getElementById('sigAnoAutre').value : sigData.ano;
+    const dur = sigTimerSeconds > 0 ? Math.ceil(sigTimerSeconds / 60) : document.getElementById('sigDuree').value;
+    const comment = document.getElementById('sigComment').value;
+    
+    let preview = `🚨 *SIGNALEMENT ANOMALIE*\n━━━━━━━━━━━━━━\n`;
+    preview += `👤 ${user.nom || user.username}\n`;
+    if (sigData.ligne) preview += `📍 ${sigData.ligne}\n`;
+    if (sigData.machine) preview += `⚙️ ${sigData.machine}\n`;
+    if (sigData.zone) preview += `🔧 ${sigData.zone}\n`;
+    if (comp) preview += `🔩 ${comp}\n`;
+    if (ano) preview += `⚠️ ${ano}\n`;
+    if (sigData.techs.length) preview += `👨‍🔧 ${sigData.techs.join(', ')}\n`;
+    if (dur) preview += `⏱️ ${dur} min\n`;
+    if (comment) preview += `💬 ${comment}\n`;
+    
+    document.getElementById('sigPreview').textContent = preview;
+    
+    const isValid = sigData.ligne && sigData.machine && sigData.zone && (comp || (sigData.comp === 'Autre' && document.getElementById('sigCompAutre').value)) && (ano || (sigData.ano === 'Autre' && document.getElementById('sigAnoAutre').value));
+    document.getElementById('btnSaveSig').disabled = !isValid;
+    document.getElementById('btnWaSig').disabled = !isValid;
+}
+
+async function saveSig() {
+    showLoader('Enregistrement...');
+    
+    const comp = sigData.comp === 'Autre' ? document.getElementById('sigCompAutre').value : sigData.comp;
+    const ano = sigData.ano === 'Autre' ? document.getElementById('sigAnoAutre').value : sigData.ano;
+    const dur = sigTimerSeconds > 0 ? Math.ceil(sigTimerSeconds / 60) : document.getElementById('sigDuree').value;
+    
+    const data = {
+        operateur: user.nom || user.username,
+        ligne: sigData.ligne,
+        machine: sigData.machine,
+        zone: sigData.zone,
+        composant: comp,
+        anomalie: ano,
+        techniciens: sigData.techs.join(', '),
+        duree: dur,
+        commentaire: document.getElementById('sigComment').value,
+        photo: sigPhotoUrl || '',
+        userId: user.id
+    };
+    
+    const result = await apiCall('createAnomalie', data);
+    hideLoader();
+    
+    if (result.success) {
+        document.getElementById('sigSuccessId').textContent = result.id || 'OK';
+        document.querySelectorAll('#sigTabNouveau .card, #sigTabNouveau .timer-card').forEach(el => el.classList.add('hidden'));
+        document.getElementById('sigSuccess').classList.remove('hidden');
+        document.getElementById('sigActions').classList.add('hidden');
+        document.getElementById('btnResetSig').classList.remove('hidden');
+        toast('✅ Signalement enregistré !', 'success');
+        await loadAllData();
+        setTimeout(() => switchSigTab('historique'), 2000);
+    } else {
+        toast('❌ ' + (result.error || 'Erreur'), 'error');
+    }
+}
+
+function resetSig() {
+    sigData = { ligne: '', machine: '', zone: '', comp: '', ano: '', techs: [] };
+    sigPhoto = sigPhotoUrl = null;
+    resetSigTimer();
+    document.getElementById('sigDuree').value = '';
+    document.getElementById('sigComment').value = '';
+    document.querySelectorAll('#sigLignes .chip, #sigMachines .chip, .tech-item').forEach(el => el.classList.remove('sel'));
+    document.querySelectorAll('.tech-item input').forEach(el => el.checked = false);
+    document.getElementById('sigSelTechs').classList.add('hidden');
+    removeSigPhoto();
+    document.querySelectorAll('#sigTabNouveau .card, #sigTabNouveau .timer-card').forEach(el => el.classList.remove('hidden'));
+    document.getElementById('sigSuccess').classList.add('hidden');
+    document.getElementById('sigActions').classList.add('show');
+    document.getElementById('btnResetSig').classList.add('hidden');
+    hide(['sig3','sig4','sig5','sig6','sig7','sig8','sig9','sig10','sigPreviewCard']);
+    updateSigPreview();
+}
+
+function sendWaSig() {
+    const text = document.getElementById('sigPreview').textContent;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function updateSigHist() {
+    document.getElementById('sigHistCount').textContent = allSig.length;
+    filterSigHist(document.querySelector('#sigTabHistorique .fbtn.active'), 'all');
+}
+
+function filterSigHist(el, filter) {
+    document.querySelectorAll('#sigTabHistorique .fbtn').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    
+    let filtered = allSig;
+    if (filter === 'encours') filtered = allSig.filter(s => s.statut !== 'termine' && s.statut !== 'Clôturé');
+    else if (filter === 'cloture') filtered = allSig.filter(s => s.statut === 'termine' || s.statut === 'Clôturé');
+    
+    renderSigHist(filtered);
+}
+
+function renderSigHist(list) {
+    const d = document.getElementById('sigHistList');
+    if (!list.length) { d.innerHTML = '<div class="empty"><div class="eico">📋</div>Aucun signalement</div>'; return; }
+    d.innerHTML = list.map(s => `
+        <div class="list-item">
+            <div class="list-row"><span class="list-id">📋 ${s.id || s.ID || '-'}</span><span class="badge ${s.statut === 'termine' || s.statut === 'Clôturé' ? 'ok' : 'warn'}">${s.statut || 'En cours'}</span></div>
+            <div class="list-title">${s.machine || s.Machine || '-'}</div>
+            <div class="list-sub">${s.anomalie || s.Anomalie || '-'} | ${s.date || s.Date || ''}</div>
+        </div>
+    `).join('');
+}
+
+// =====================================================
+// MAINTENANCE
+// =====================================================
+function switchMaintTab(tab) {
+    document.querySelectorAll('#pgMaint .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#pgMaint .tab-content').forEach(c => c.classList.remove('active'));
+    if (tab === 'bt') {
+        document.querySelector('#pgMaint .tab:first-child').classList.add('active');
+        document.getElementById('maintTabBT').classList.add('active');
+    } else {
+        document.querySelector('#pgMaint .tab:last-child').classList.add('active');
+        document.getElementById('maintTabHistorique').classList.add('active');
+        renderBTHist();
+    }
+}
+
+function updateBTList() {
+    const open = allBT.filter(b => b.statut !== 'termine' && b.statut !== 'Clôturé');
+    document.getElementById('btOpenCount').textContent = open.length;
+    filterBT(document.querySelector('#maintTabBT .fbtn.active'), 'all');
+}
+
+function filterBT(el, filter) {
+    document.querySelectorAll('#maintTabBT .fbtn').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    
+    let filtered = allBT.filter(b => b.statut !== 'termine' && b.statut !== 'Clôturé');
+    if (filter === 'encours') filtered = allBT.filter(b => b.statut === 'En cours' || b.statut === 'en_cours');
+    else if (filter === 'attente') filtered = allBT.filter(b => b.statut === 'Attente pièce' || b.statut === 'attente');
+    
+    renderBTList(filtered);
+}
+
+function filterBTSearch() {
+    const q = document.getElementById('searchBT').value.toLowerCase();
+    const filtered = allBT.filter(b => (b.numero || '').toLowerCase().includes(q) || (b.equipement || b.machine || '').toLowerCase().includes(q));
+    renderBTList(filtered);
+}
+
+function renderBTList(list) {
+    const d = document.getElementById('btList');
+    if (!list.length) { d.innerHTML = '<div class="empty"><div class="eico">🔧</div>Aucun BT</div>'; return; }
+    d.innerHTML = list.map(bt => `
+        <div class="list-item">
+            <div class="list-row"><span class="list-id">🔧 ${bt.numero || bt.id}</span><span class="badge ${bt.statut === 'En cours' ? 'warn' : (bt.statut === 'Attente pièce' ? 'info' : 'ok')}">${bt.statut || 'En cours'}</span></div>
+            <div class="list-title">${bt.equipement || bt.machine || '-'}</div>
+            <div class="list-sub">📅 ${bt.dateCreation || bt.date || ''}</div>
+        </div>
+    `).join('');
+}
+
+function renderBTHist() {
+    const closed = allBT.filter(b => b.statut === 'termine' || b.statut === 'Clôturé');
+    const d = document.getElementById('btHistList');
+    if (!closed.length) { d.innerHTML = '<div class="empty"><div class="eico">📜</div>Aucun historique</div>'; return; }
+    d.innerHTML = closed.map(bt => `
+        <div class="list-item">
+            <div class="list-row"><span class="list-id">🔧 ${bt.numero || bt.id}</span><span class="badge ok">Clôturé</span></div>
+            <div class="list-title">${bt.equipement || bt.machine || '-'}</div>
+            <div class="list-sub">📅 ${bt.dateFin || bt.date || ''}</div>
+        </div>
+    `).join('');
+}
+
+// =====================================================
+// EQUIPEMENTS
+// =====================================================
+function updateEquipList() { filterEquip(); }
+
+function filterEquip() {
+    const q = document.getElementById('searchEquip').value.toLowerCase();
+    const filtered = allEquip.filter(e => (e.nom || '').toLowerCase().includes(q) || (e.code || '').toLowerCase().includes(q));
+    renderEquipList(filtered);
+}
+
+function renderEquipList(list) {
+    const d = document.getElementById('equipList');
+    if (!list.length) { d.innerHTML = '<div class="empty"><div class="eico">⚙️</div>Aucun équipement</div>'; return; }
+    d.innerHTML = list.map(e => `
+        <div class="list-item">
+            <div class="list-row"><span class="list-id">⚙️ ${e.code || '-'}</span><span class="badge ${e.statut === 'actif' ? 'ok' : 'danger'}">${e.statut || 'actif'}</span></div>
+            <div class="list-title">${e.nom || '-'}</div>
+            <div class="list-sub">${e.ligne || ''} - ${e.zone || ''}</div>
+        </div>
+    `).join('');
+}
+
+// =====================================================
+// STOCK
+// =====================================================
+function updateStockList() { filterStock(); }
+
+function filterStock() {
+    const q = document.getElementById('searchStock').value.toLowerCase();
+    const filtered = allPieces.filter(p => (p.designation || '').toLowerCase().includes(q) || (p.reference || '').toLowerCase().includes(q));
+    renderStockList(filtered);
+}
+
+function renderStockList(list) {
+    const d = document.getElementById('stockList');
+    if (!list.length) { d.innerHTML = '<div class="empty"><div class="eico">📦</div>Aucune pièce</div>'; return; }
+    d.innerHTML = list.map(p => {
+        const isLow = (p.quantite || 0) <= (p.seuil_alerte || 5);
+        return `
+        <div class="list-item">
+            <div class="list-row"><span class="list-id">📦 ${p.reference || '-'}</span><span class="badge ${isLow ? 'danger' : 'ok'}">${p.quantite || 0}</span></div>
+            <div class="list-title">${p.designation || '-'}</div>
+            <div class="list-sub">${isLow ? '⚠️ Stock critique' : '✅ Stock OK'}</div>
+        </div>
+    `}).join('');
+}
+
+// =====================================================
+// RAPPORTS
+// =====================================================
+function updateRapports() {
+    const total = allSig.length;
+    const resolus = allSig.filter(s => s.statut === 'termine' || s.statut === 'Clôturé').length;
+    const taux = total > 0 ? Math.round((resolus / total) * 100) : 0;
+    
+    document.getElementById('tauxResol').textContent = taux + '%';
+    document.getElementById('progressBar').style.width = taux + '%';
+    document.getElementById('rapSig').textContent = total;
+    document.getElementById('rapBT').textContent = allBT.length;
+    document.getElementById('rapEquip').textContent = allEquip.length;
+    document.getElementById('rapTech').textContent = db.techniciens.length;
+}
+
+// =====================================================
+// VOICE
+// =====================================================
+function initSpeechRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        speechRecognition = new SR();
+        speechRecognition.continuous = true;
+        speechRecognition.interimResults = true;
+        speechRecognition.lang = voiceLang;
+        
+        speechRecognition.onresult = (e) => {
+            let interim = '', final = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                if (e.results[i].isFinal) final += e.results[i][0].transcript;
+                else interim += e.results[i][0].transcript;
+            }
+            voiceTranscript += final;
+            document.getElementById('voiceText').textContent = voiceTranscript + interim;
+        };
+        
+        speechRecognition.onerror = (e) => {
+            let msg = 'Erreur';
+            if (e.error === 'no-speech') msg = 'Aucune parole détectée';
+            else if (e.error === 'network') msg = 'Erreur réseau';
+            document.getElementById('voiceStatus').textContent = msg;
+            stopVoiceRecording();
+        };
+        
+        speechRecognition.onend = () => { if (isRecording) speechRecognition.start(); };
+    }
+}
+
+function openVoiceModal(fieldId) {
+    if (!speechRecognition) { toast('Saisie vocale non disponible', 'error'); return; }
+    voiceTargetField = fieldId;
+    voiceTranscript = document.getElementById(fieldId).value;
+    document.getElementById('voiceText').textContent = voiceTranscript;
+    document.getElementById('voiceModal').classList.add('active');
+}
+
+function closeVoiceModal() {
+    stopVoiceRecording();
+    document.getElementById('voiceModal').classList.remove('active');
+    voiceTargetField = null;
+    voiceTranscript = '';
+}
+
+function setVoiceLang(lang) {
+    voiceLang = lang;
+    if (speechRecognition) speechRecognition.lang = lang;
+    document.getElementById('langFR').classList.toggle('active', lang === 'fr-FR');
+    document.getElementById('langAR').classList.toggle('active', lang === 'ar-MA');
+}
+
+function toggleVoiceRecord() {
+    if (isRecording) stopVoiceRecording();
+    else startVoiceRecording();
+}
+
+function startVoiceRecording() {
+    if (!speechRecognition) return;
+    isRecording = true;
+    speechRecognition.lang = voiceLang;
+    speechRecognition.start();
+    document.getElementById('voiceRecordBtn').classList.add('recording');
+    document.getElementById('voiceRecordBtn').textContent = '⏹️';
+    document.getElementById('voiceStatus').textContent = '🔴 Parlez maintenant...';
+}
+
+function stopVoiceRecording() {
+    if (!speechRecognition) return;
+    isRecording = false;
+    speechRecognition.stop();
+    document.getElementById('voiceRecordBtn').classList.remove('recording');
+    document.getElementById('voiceRecordBtn').textContent = '🎤';
+    document.getElementById('voiceStatus').textContent = 'Appuyez pour parler';
+}
+
+function confirmVoice() {
+    const text = document.getElementById('voiceText').textContent.trim();
+    if (voiceTargetField && text) {
+        document.getElementById(voiceTargetField).value = text;
+        if (voiceTargetField === 'sigComment') updateSigPreview();
+    }
+    closeVoiceModal();
+}
+
+// =====================================================
+// UTILITIES
+// =====================================================
+function show(ids) { ids.forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); }); }
+function hide(ids) { ids.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); }
+function showLoader(text = 'Chargement...') { document.getElementById('loaderText').textContent = text; document.getElementById('loader').classList.add('active'); }
+function hideLoader() { document.getElementById('loader').classList.remove('active'); }
+function toast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show ' + type; setTimeout(() => t.classList.remove('show'), 3000); }
+
+// Service Worker
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
+</script>
+</body>
+</html>
