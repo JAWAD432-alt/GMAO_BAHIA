@@ -622,9 +622,9 @@
 
     // ============ INIT ============
     document.addEventListener('DOMContentLoaded',()=>{
-        // Configuration API par défaut
-        if(!localStorage.getItem('bahia_url')) localStorage.setItem('bahia_url', 'https://script.google.com/macros/s/AKfycbyKpak4Hz4FeC5z2lF0MR57o7t9Bs3KsXCfVOGEmrVEHlYrsvl1rJ8Qm14FpCqMSn1e/exec');
-        if(!localStorage.getItem('bahia_token')) localStorage.setItem('bahia_token', 'gmao2024');
+        // AUTO-CONFIG API
+        localStorage.setItem('bahia_url', 'https://script.google.com/macros/s/AKfycbzmioxe7UoRfLeIo3fPYmOzw_93n-cxmd8lNw3lJXX4D6qihaOOs0l5Gg-gyTQ11q7e/exec');
+        localStorage.setItem('bahia_token', 'gmao2024');
         const saved=localStorage.getItem('bahia_user');
         if(saved){user=JSON.parse(saved);showApp()}
         else document.getElementById('loginPage').style.display='flex';
@@ -673,6 +673,8 @@
         try{
             const r=await fetch(`${url}?token=${encodeURIComponent(token)}`);
             db=await r.json();
+            console.log('DB chargée:', db);
+            console.log('Machines:', db.machines);
             if(db.error)throw new Error(db.error);
             setStatus(true,'Connecté');
             allPieces=db.pieces||[];
@@ -704,10 +706,11 @@
     // ============ SIGNALEMENT ============
     function initSig(){
         document.getElementById('sigLoading').classList.add('hidden');
+        if(!db||!db.machines||db.machines.length===0){console.warn('Pas de machines dans db');return;}
         document.getElementById('sigOpName').textContent=user.nom;
         document.getElementById('sigOpRole').textContent=user.role;
-        const lignes=[...new Set((db.machines||[]).map(m=>m.Ligne))];
-        document.getElementById('sigLignes').innerHTML=lignes.map(l=>`<div class="chip" onclick="selectSigLigne(this,'${l}')">${l}</div>`).join('');
+        const lignes=[...new Set((db.machines||[]).map(m=>m.Ligne))].filter(l=>l&&l.toString().trim());
+        console.log('Lignes chargées:',lignes);document.getElementById('sigLignes').innerHTML=lignes.map(l=>`<div class="chip" onclick="selectSigLigne(this,'${l}')">${l}</div>`).join('');
         document.getElementById('sigTechs').innerHTML=(db.techniciens||[]).map(t=>`<div class="tech-item" onclick="toggleSigTech(this,'${t.Nom}')"><input type="checkbox"><span class="tech-name">${t.Nom}</span></div>`).join('');
         document.getElementById('sigAno').innerHTML='<option value="">-- Sélectionner --</option>'+(db.anomalies||[]).map(a=>`<option value="${a.Anomalie}">${a.Anomalie}</option>`).join('')+'<option value="Autre">➕ Autre</option>';
     }
