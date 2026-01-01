@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="GMAO BAHIA - Gestion Maintenance Assistée">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>GMAO BAHIA v8</title>
+    <style>
+:root{--primary:#1e40af;--primary-light:#3b82f6;--secondary:#f59e0b;--success:#10b981;--danger:#ef4444;--purple:#8b5cf6;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-700:#334155;--gray-800:#1e293b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--gray-100);min-height:100vh;min-height:100dvh;color:var(--gray-800)}
+.hidden{display:none!important}
+
+/* LOGIN */
+.login-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:linear-gradient(135deg,var(--primary),var(--primary-light))}
+.login-header{padding:60px 24px 40px;text-align:center;color:#fff}
+.login-logo{font-size:64px;margin-bottom:16px}
+.login-header h1{font-size:28px;font-weight:800}
+.login-header p{opacity:.9;font-size:14px;margin-top:8px}
+.login-card{flex:1;background:#fff;border-radius:32px 32px 0 0;padding:32px 24px;box-shadow:0 -10px 40px rgba(0,0,0,.1)}
+.login-card h2{font-size:22px;margin-bottom:24px;text-align:center}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:14px;font-weight:600;color:var(--gray-600);margin-bottom:8px}
+.input-box{position:relative}
+.input-box .icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px}
+.input-box input{width:100%;padding:16px 16px 16px 52px;border:2px solid var(--gray-200);border-radius:14px;font-size:16px;background:var(--gray-50);transition:all .2s}
+.input-box input:focus{outline:none;border-color:var(--primary);background:#fff}
+.checkbox-group{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.checkbox-group input{width:20px;height:20px;accent-color:var(--primary)}
+.checkbox-group label{font-size:14px;color:var(--gray-600)}
+.btn-login{width:100%;padding:18px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(30,64,175,.3);transition:transform .2s}
+.btn-login:active{transform:scale(.98)}
+.btn-login:disabled{background:var(--gray-400);box-shadow:none}
+.login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--danger);padding:14px;border-radius:12px;margin-bottom:20px;font-size:14px;display:none}
+
+/* APP */
+.app{display:none;min-height:100vh;min-height:100dvh;padding-bottom:100px}
+.app.active{display:block}
+
+/* HEADER */
+.header{background:#fff;padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.header-user{display:flex;align-items:center;gap:12px}
+.avatar{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+.user-info h1{font-size:16px;font-weight:700}
+.user-info .role{font-size:13px;color:var(--gray-500)}
+.header-actions{display:flex;gap:8px}
+.header-btn{width:44px;height:44px;border-radius:12px;background:var(--gray-100);border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.header-btn:active{background:var(--gray-200)}
+.header-btn.danger{background:#fef2f2;color:var(--danger)}
+.status-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding:8px 16px;background:var(--gray-50);border-radius:10px;font-size:13px;color:var(--gray-600)}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--danger)}
+.status-dot.online{background:var(--success)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:8px 12px 24px;display:flex;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.1);z-index:1000}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;border-radius:14px;background:none;border:none;color:var(--gray-400);font-size:12px;font-weight:600;cursor:pointer;position:relative;transition:all .2s}
+.nav-btn .nav-icon{font-size:24px}
+.nav-btn.active{color:var(--primary);background:#eff6ff}
+.nav-badge{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+/* PAGES */
+.page{display:none;padding:20px;padding-bottom:120px}
+.page.active{display:block}
+.page-title{font-size:22px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+
+/* TABS */
+.tabs{display:flex;background:var(--gray-100);border-radius:16px;padding:5px;margin-bottom:20px}
+.tab-btn{flex:1;padding:14px 12px;border:none;background:none;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
+.tab-btn.active{background:#fff;color:var(--primary);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.tab-btn .tab-icon{font-size:20px}
+.tab-badge{background:var(--danger);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.card-icon.blue{background:#dbeafe}
+.card-icon.orange{background:#fef3c7}
+.card-icon.green{background:#d1fae5}
+.card-icon.red{background:#fee2e2}
+.card-icon.purple{background:#ede9fe}
+.card-title{font-size:16px;font-weight:700}
+.card-subtitle{font-size:13px;color:var(--gray-500)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,.06)}
+.stat-value{font-size:32px;font-weight:800;color:var(--primary)}
+.stat-label{font-size:13px;color:var(--gray-500);margin-top:4px}
+.stat-card.warning .stat-value{color:var(--secondary)}
+.stat-card.success .stat-value{color:var(--success)}
+.stat-card.danger .stat-value{color:var(--danger)}
+
+/* FORMS */
+.form-label{font-size:14px;font-weight:600;color:var(--gray-600);margin-bottom:8px;display:block}
+.form-select,.form-input,.form-textarea{width:100%;padding:14px 16px;border:2px solid var(--gray-200);border-radius:12px;font-size:16px;background:var(--gray-50);color:var(--gray-800);transition:all .2s}
+.form-select:focus,.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--primary);background:#fff}
+.form-textarea{resize:none;min-height:100px}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:12px 18px;background:#e0e7ff;border:2px solid #818cf8;border-radius:30px;font-size:15px;font-weight:600;color:#3730a3;cursor:pointer;transition:all .2s}
+.chip:active{transform:scale(.95)}
+.chip.selected{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* TECH GRID */
+.tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tech-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f0f9ff;border:2px solid #7dd3fc;border-radius:12px;cursor:pointer;transition:all .2s}
+.tech-item.selected{border-color:var(--primary);background:#eff6ff}
+.tech-item input{width:20px;height:20px;accent-color:var(--primary)}
+.tech-name{font-size:14px;font-weight:600;flex:1}
+
+/* TIMER */
+.timer-card{background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff;border-radius:18px;padding:24px;text-align:center;margin-bottom:16px}
+.timer-label{font-size:14px;opacity:.9;margin-bottom:10px}
+.timer-display{font-size:48px;font-weight:800;font-family:'Courier New',monospace;letter-spacing:3px}
+.timer-buttons{display:flex;justify-content:center;gap:12px;margin-top:16px}
+.timer-btn{padding:12px 24px;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:15px;transition:transform .2s}
+.timer-btn:active{transform:scale(.95)}
+.timer-btn.start{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4)}
+.timer-btn.reset{background:rgba(0,0,0,.2);color:#fff}
+
+/* DI CARD */
+.di-card{background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 15px rgba(0,0,0,.06);border-left:5px solid var(--danger)}
+.di-card.done{border-left-color:var(--success)}
+.di-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.di-id{font-size:17px;font-weight:700;color:var(--danger)}
+.di-card.done .di-id{color:var(--success)}
+.di-date{font-size:12px;color:var(--gray-400)}
+.di-badge{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.di-badge.waiting{background:#fef3c7;color:#b45309}
+.di-badge.done{background:#d1fae5;color:#059669}
+.di-machine{font-size:16px;font-weight:600;margin-bottom:6px}
+.di-info{font-size:14px;color:var(--gray-600);margin-bottom:4px}
+.di-actions{display:flex;gap:10px;margin-top:14px}
+.di-btn{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s}
+.di-btn:active{transform:scale(.97)}
+.di-btn.primary{background:var(--primary);color:#fff}
+.di-btn.secondary{background:var(--gray-100);color:var(--gray-700)}
+.di-btn.success{background:var(--success);color:#fff}
+
+/* BT CARD */
+.bt-card{background:linear-gradient(135deg,var(--secondary),#d97706);color:#fff;border-radius:18px;padding:18px;margin-bottom:14px;cursor:pointer;transition:transform .2s}
+.bt-card:active{transform:scale(.98)}
+.bt-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.bt-id{font-size:19px;font-weight:800}
+.bt-ref{font-size:13px;opacity:.8}
+.bt-section{background:rgba(255,255,255,.15);border-radius:12px;padding:12px;margin-bottom:10px}
+.bt-section-title{font-size:12px;opacity:.7;text-transform:uppercase;margin-bottom:4px}
+.bt-section-value{font-weight:600;font-size:15px}
+.bt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* LIST */
+.list-container{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.list-empty{padding:50px 24px;text-align:center;color:var(--gray-400)}
+.list-empty .empty-icon{font-size:56px;margin-bottom:14px}
+.list-item{padding:16px;border-bottom:1px solid var(--gray-100)}
+.list-item:last-child{border-bottom:none}
+
+/* SEARCH */
+.search-box{position:relative;margin-bottom:16px}
+.search-box .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--gray-400)}
+.search-box input{width:100%;padding:16px 16px 16px 52px;border:2px solid var(--gray-200);border-radius:14px;font-size:16px;background:#fff}
+.search-box input:focus{outline:none;border-color:var(--primary)}
+
+/* PIECES */
+.piece-item{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--gray-100)}
+.piece-item:last-child{border-bottom:none}
+.piece-check{width:22px;height:22px;accent-color:var(--primary)}
+.piece-info{flex:1}
+.piece-code{font-weight:700;font-size:15px;color:var(--primary)}
+.piece-name{font-size:14px;color:var(--gray-600)}
+.piece-stock{font-size:13px;color:var(--gray-400)}
+.stock-low{background:#fef2f2;color:var(--danger);padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600}
+
+/* USER BADGE */
+.user-badge{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:14px 18px;border-radius:14px;display:flex;align-items:center;gap:12px}
+.user-badge .badge-icon{font-size:28px}
+.user-badge .badge-name{font-weight:700;font-size:16px}
+.user-badge .badge-role{font-size:13px;opacity:.9}
+
+/* PREVIEW */
+.preview-box{background:var(--gray-800);color:#fff;padding:16px;border-radius:14px;font-family:'Courier New',monospace;font-size:13px;white-space:pre-wrap;line-height:1.6}
+
+/* SUCCESS BOX */
+.success-box{text-align:center;padding:40px 24px;background:#d1fae5;border-radius:18px;margin-bottom:16px}
+.success-icon{font-size:60px;margin-bottom:14px}
+.success-box h3{color:var(--success);font-size:20px;margin-bottom:8px}
+.success-box p{color:var(--gray-600);font-size:14px}
+.success-id{font-size:18px;font-weight:700;color:var(--gray-800);margin-top:14px;font-family:'Courier New',monospace}
+
+/* MODAL */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal.show{opacity:1;pointer-events:auto}
+.modal-content{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:24px;transform:translateY(100%);transition:transform .3s}
+.modal.show .modal-content{transform:translateY(0)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{font-size:20px;font-weight:700}
+.modal-close{width:40px;height:40px;border-radius:50%;background:var(--gray-100);border:none;font-size:22px;cursor:pointer}
+
+/* ACTION BAR */
+.action-bar{position:fixed;bottom:100px;left:0;right:0;padding:16px 20px;background:linear-gradient(transparent,var(--gray-100) 30%);z-index:500;display:none}
+.action-bar.show{display:block}
+.action-buttons{display:flex;gap:12px}
+.btn{flex:1;padding:16px;border:none;border-radius:16px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .2s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{background:var(--gray-400)!important;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-warning{background:var(--secondary);color:#fff}
+.btn-whatsapp{width:60px;flex:none;background:#25d366;color:#fff;border-radius:16px}
+.btn-whatsapp svg{width:28px;height:28px;fill:#fff}
+
+/* TOAST */
+.toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--gray-800);color:#fff;padding:14px 28px;border-radius:30px;font-size:15px;font-weight:600;z-index:3000;opacity:0;transition:all .3s}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* PRINT */
+@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%;padding:20px}}
+.print-area{display:none}
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="login-page" id="loginPage">
+    <div class="login-header">
+        <div class="login-logo">🏭</div>
+        <h1>GMAO BAHIA</h1>
+        <p>Gestion Maintenance Assistée v8.0</p>
+    </div>
+    <div class="login-card">
+        <h2>Connexion</h2>
+        <div class="login-error" id="loginError"></div>
+        <div class="form-group">
+            <label>Identifiant</label>
+            <div class="input-box">
+                <span class="icon">👤</span>
+                <input type="text" id="loginUser" placeholder="Votre identifiant" autocomplete="username">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Mot de passe</label>
+            <div class="input-box">
+                <span class="icon">🔒</span>
+                <input type="password" id="loginPass" placeholder="Votre mot de passe" autocomplete="current-password">
+            </div>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="rememberMe" checked>
+            <label for="rememberMe">Se souvenir de moi</label>
+        </div>
+        <button class="btn-login" onclick="doLogin()">🚀 Connexion</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="app" id="mainApp">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="header-user">
+                <div class="avatar" id="userAvatar">A</div>
+                <div class="user-info">
+                    <h1 id="userName">Utilisateur</h1>
+                    <div class="role" id="userRole">Opérateur</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" onclick="refreshData()" title="Actualiser">🔄</button>
+                <button class="header-btn danger" onclick="doLogout()" title="Déconnexion">🚪</button>
+            </div>
+        </div>
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Connexion...</span>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         PAGE: ACCUEIL
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="page active" id="pageHome">
+        <h2 class="page-title">📊 Tableau de bord</h2>
+        <div class="stats-grid">
+            <div class="stat-card danger">
+                <div class="stat-value" id="statDI">0</div>
+                <div class="stat-label">DI en attente</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="statBT">0</div>
+                <div class="stat-label">BT ce mois</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value" id="statResolved">0</div>
+                <div class="stat-label">Résolus</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statStock">0</div>
+                <div class="stat-label">Stock critique</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon orange">📋</div>
+                <div>
+                    <div class="card-title">Activité récente</div>
+                    <div class="card-subtitle">Dernières interventions</div>
+                </div>
+            </div>
+            <div id="recentActivity">
+                <div class="list-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>Aucune activité récente</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         PAGE: SIGNALEMENT (Opérateur crée DI)
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="pageSignal">
+        <h2 class="page-title">🚨 Signalement</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showSignalTab('new')">
+                <span class="tab-icon">➕</span>
+                Nouveau
+            </button>
+            <button class="tab-btn" onclick="showSignalTab('history')">
+                <span class="tab-icon">📜</span>
+                Historique
+                <span class="tab-badge" id="myDICount">0</span>
+            </button>
+        </div>
+
+        <!-- Tab: Nouveau signalement -->
+        <div class="tab-content active" id="tabSignalNew">
+            <!-- Timer -->
+            <div class="timer-card">
+                <div class="timer-label">⏱️ Temps d'arrêt machine</div>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-buttons">
+                    <button class="timer-btn start" id="timerStartBtn" onclick="toggleTimer()">▶️ Démarrer</button>
+                    <button class="timer-btn reset" onclick="resetTimer()">🔄 Reset</button>
+                </div>
+            </div>
+
+            <!-- Step 1: Opérateur -->
+            <div class="card" id="step1">
+                <div class="card-header">
+                    <div class="card-icon blue">1️⃣</div>
+                    <div class="card-title">Opérateur</div>
+                </div>
+                <div class="user-badge" id="operatorBadge">
+                    <span class="badge-icon">👤</span>
+                    <div>
+                        <div class="badge-name">-</div>
+                        <div class="badge-role">Opérateur</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Ligne -->
+            <div class="card" id="step2">
+                <div class="card-header">
+                    <div class="card-icon blue">2️⃣</div>
+                    <div class="card-title">Ligne de production</div>
+                </div>
+                <div class="chips" id="lignesChips"></div>
+            </div>
+
+            <!-- Step 3: Machine -->
+            <div class="card hidden" id="step3">
+                <div class="card-header">
+                    <div class="card-icon blue">3️⃣</div>
+                    <div class="card-title">Machine</div>
+                </div>
+                <div class="chips" id="machinesChips"></div>
+            </div>
+
+            <!-- Step 4: Zone -->
+            <div class="card hidden" id="step4">
+                <div class="card-header">
+                    <div class="card-icon blue">4️⃣</div>
+                    <div class="card-title">Zone</div>
+                </div>
+                <div class="chips" id="zonesChips"></div>
+            </div>
+
+            <!-- Step 5: Composant -->
+            <div class="card hidden" id="step5">
+                <div class="card-header">
+                    <div class="card-icon blue">5️⃣</div>
+                    <div class="card-title">Composant</div>
+                </div>
+                <div class="chips" id="composantsChips"></div>
+            </div>
+
+            <!-- Step 6: Anomalie -->
+            <div class="card hidden" id="step6">
+                <div class="card-header">
+                    <div class="card-icon red">6️⃣</div>
+                    <div class="card-title">Type d'anomalie</div>
+                </div>
+                <div class="chips" id="anomaliesChips"></div>
+            </div>
+
+            <!-- Step 7: Techniciens -->
+            <div class="card hidden" id="step7">
+                <div class="card-header">
+                    <div class="card-icon purple">7️⃣</div>
+                    <div class="card-title">Technicien(s) à notifier</div>
+                </div>
+                <div class="tech-grid" id="techsGrid"></div>
+            </div>
+
+            <!-- Step 8: Commentaire -->
+            <div class="card hidden" id="step8">
+                <div class="card-header">
+                    <div class="card-icon green">8️⃣</div>
+                    <div class="card-title">Commentaire (optionnel)</div>
+                </div>
+                <textarea class="form-textarea" id="commentInput" placeholder="Description supplémentaire..."></textarea>
+            </div>
+
+            <!-- Preview -->
+            <div class="card hidden" id="previewCard">
+                <div class="card-header">
+                    <div class="card-icon orange">👁️</div>
+                    <div class="card-title">Aperçu du message</div>
+                </div>
+                <div class="preview-box" id="previewBox"></div>
+            </div>
+
+            <!-- Success -->
+            <div class="success-box hidden" id="successBox">
+                <div class="success-icon">✅</div>
+                <h3>DI Enregistrée !</h3>
+                <p>En attente de traitement par un technicien</p>
+                <div class="success-id" id="successId">DI-XXXXXXXX</div>
+            </div>
+        </div>
+
+        <!-- Tab: Historique -->
+        <div class="tab-content" id="tabSignalHistory">
+            <div class="list-container" id="myDIList">
+                <div class="list-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>Aucun signalement</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         PAGE: MAINTENANCE (Technicien traite DI → BT)
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="pageMaint">
+        <h2 class="page-title">🔧 Maintenance</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showMaintTab('di')">
+                <span class="tab-icon">📋</span>
+                DI à traiter
+                <span class="tab-badge" id="diWaitingCount">0</span>
+            </button>
+            <button class="tab-btn" onclick="showMaintTab('bt')">
+                <span class="tab-icon">📄</span>
+                Historique BT
+            </button>
+        </div>
+
+        <!-- Tab: DI en attente -->
+        <div class="tab-content active" id="tabMaintDI">
+            <div id="diWaitingList">
+                <div class="list-empty">
+                    <div class="empty-icon">✅</div>
+                    <div>Aucune DI en attente</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Historique BT -->
+        <div class="tab-content" id="tabMaintBT">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchBT" placeholder="Rechercher un BT..." oninput="filterBTs()">
+            </div>
+            <div id="btList">
+                <div class="list-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>Aucun BT</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         PAGE: PDR (Stock)
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="pagePDR">
+        <h2 class="page-title">📦 Pièces de Rechange</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showPDRTab('stock')">
+                <span class="tab-icon">📦</span>
+                Stock
+            </button>
+            <button class="tab-btn" onclick="showPDRTab('sorties')">
+                <span class="tab-icon">📤</span>
+                Sorties
+            </button>
+        </div>
+
+        <!-- Tab: Stock -->
+        <div class="tab-content active" id="tabPDRStock">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchPiece" placeholder="Rechercher une pièce..." oninput="filterPieces()">
+            </div>
+            <div class="list-container" id="piecesList">
+                <div class="list-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>Aucune pièce</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Sorties -->
+        <div class="tab-content" id="tabPDRSorties">
+            <div class="list-container" id="sortiesList">
+                <div class="list-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>Aucune sortie</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="goToPage('pageHome', this)">
+            <span class="nav-icon">🏠</span>
+            Accueil
+        </button>
+        <button class="nav-btn" onclick="goToPage('pageSignal', this)">
+            <span class="nav-icon">🚨</span>
+            Signaler
+        </button>
+        <button class="nav-btn" onclick="goToPage('pageMaint', this)">
+            <span class="nav-icon">🔧</span>
+            Maintenance
+            <span class="nav-badge" id="navDIBadge" style="display:none">0</span>
+        </button>
+        <button class="nav-btn" onclick="goToPage('pagePDR', this)">
+            <span class="nav-icon">📦</span>
+            PDR
+        </button>
+    </nav>
+
+    <!-- Action Bar for Signalement -->
+    <div class="action-bar" id="signalActionBar">
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="btnSaveDI" onclick="saveDI()" disabled>
+                💾 Enregistrer DI
+            </button>
+            <button class="btn btn-whatsapp" id="btnWhatsApp" onclick="sendWhatsApp()" disabled>
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Traitement DI (Technicien)
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal" id="modalTraitement">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🔧 Traiter la DI</h3>
+            <button class="modal-close" onclick="closeModal('modalTraitement')">✕</button>
+        </div>
+        
+        <!-- DI Info -->
+        <div class="di-card" id="modalDIInfo" style="margin-bottom:20px"></div>
+        
+        <!-- Form -->
+        <div class="form-group">
+            <label class="form-label">Cause de la panne *</label>
+            <select class="form-select" id="traitCause">
+                <option value="">-- Sélectionner --</option>
+                <option value="Usure normale">Usure normale</option>
+                <option value="Défaut matériel">Défaut matériel</option>
+                <option value="Erreur opérateur">Erreur opérateur</option>
+                <option value="Manque maintenance">Manque maintenance préventive</option>
+                <option value="Autre">Autre</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Diagnostic *</label>
+            <textarea class="form-textarea" id="traitDiag" placeholder="Décrivez le diagnostic..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Type d'action *</label>
+            <select class="form-select" id="traitAction">
+                <option value="">-- Sélectionner --</option>
+                <option value="Correctif">Correctif</option>
+                <option value="Préventif">Préventif</option>
+                <option value="Amélioratif">Amélioratif</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Détail de l'action *</label>
+            <textarea class="form-textarea" id="traitDetail" placeholder="Décrivez l'action réalisée..."></textarea>
+        </div>
+        
+        <!-- Pièces -->
+        <div class="form-group">
+            <label class="form-label">Pièces utilisées</label>
+            <div class="search-box" style="margin-bottom:10px">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchPieceModal" placeholder="Rechercher..." oninput="filterModalPieces()">
+            </div>
+            <div class="list-container" style="max-height:200px;overflow-y:auto" id="modalPiecesList"></div>
+            <div id="selectedPiecesDisplay" style="margin-top:12px"></div>
+        </div>
+        
+        <!-- Action -->
+        <button class="btn btn-success" style="width:100%;margin-top:16px" onclick="closeDI()">
+            ✅ Clôturer DI et Générer BT
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Détail BT
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal" id="modalBT">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📄 Détail du BT</h3>
+            <button class="modal-close" onclick="closeModal('modalBT')">✕</button>
+        </div>
+        <div id="modalBTContent"></div>
+        <div class="action-buttons" style="margin-top:20px">
+            <button class="btn btn-primary" onclick="printBT()">🖨️ Imprimer</button>
+            <button class="btn btn-whatsapp" onclick="shareBTWhatsApp()">
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Print Area -->
+<div class="print-area" id="printArea"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURATION - URL et Token en dur (pas de popup config)
+// ═══════════════════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbxuZzZsapxbNNFyKIZMEBk4VEa1SXb27hCanbKTDrOqMy1hAGsN0L3-BjC3KR677Ye2/exec';
+const API_TOKEN = 'BAHIA2024SECRET';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let user = null;
+let db = { machines: [], zones: [], composants: [], anomalies: [], techniciens: [], pieces: [] };
+let allDI = [];
+let allBT = [];
+let allSorties = [];
+
+// Signalement state
+let signalData = { ligne: '', machine: '', zone: '', composant: '', anomalie: '', techniciens: [], comment: '' };
+let timerInterval = null;
+let timerSeconds = 0;
+let timerRunning = false;
+
+// Traitement state
+let currentDI = null;
+let selectedPieces = [];
+let currentBT = null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('SW registered'))
+            .catch(err => console.log('SW error:', err));
+    }
+    
+    // Check saved session
+    const saved = localStorage.getItem('gmao_user');
+    if (saved) {
+        try {
+            user = JSON.parse(saved);
+            showApp();
+        } catch (e) {
+            localStorage.removeItem('gmao_user');
+        }
+    }
+    
+    // Input listeners
+    document.getElementById('commentInput').addEventListener('input', updatePreview);
+    
+    // Enter key on login
+    document.getElementById('loginPass').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') doLogin();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API CALLS
+// ═══════════════════════════════════════════════════════════════════════════
+async function apiCall(action, params = {}) {
+    try {
+        const body = { action, token: API_TOKEN, ...params };
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════════════════
+async function doLogin() {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value.trim();
+    const errorEl = document.getElementById('loginError');
+    
+    if (!username || !password) {
+        errorEl.textContent = 'Veuillez remplir tous les champs';
+        errorEl.style.display = 'block';
+        return;
+    }
+    
+    errorEl.style.display = 'none';
+    const btn = document.querySelector('.btn-login');
+    btn.disabled = true;
+    btn.textContent = '⏳ Connexion...';
+    
+    const result = await apiCall('login', { username, password });
+    
+    if (result.success) {
+        user = result.user;
+        if (document.getElementById('rememberMe').checked) {
+            localStorage.setItem('gmao_user', JSON.stringify(user));
+        }
+        showApp();
+    } else {
+        errorEl.textContent = result.error || 'Identifiants incorrects';
+        errorEl.style.display = 'block';
+    }
+    
+    btn.disabled = false;
+    btn.textContent = '🚀 Connexion';
+}
+
+function doLogout() {
+    if (confirm('Voulez-vous vous déconnecter ?')) {
+        user = null;
+        localStorage.removeItem('gmao_user');
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('mainApp').classList.remove('active');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP INIT
+// ═══════════════════════════════════════════════════════════════════════════
+async function showApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').classList.add('active');
+    
+    // Update UI with user info
+    document.getElementById('userAvatar').textContent = user.nom.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent = user.nom;
+    document.getElementById('userRole').textContent = user.role;
+    document.querySelector('#operatorBadge .badge-name').textContent = user.nom;
+    
+    // Load data
+    await loadData();
+}
+
+async function loadData() {
+    setStatus(false, 'Chargement...');
+    
+    const result = await apiCall('getData');
+    
+    if (result.success) {
+        db = result;
+        setStatus(true, 'Connecté');
+        initSignalForm();
+        await loadAllData();
+    } else {
+        setStatus(false, 'Erreur connexion');
+        toast('❌ Erreur de connexion au serveur');
+    }
+}
+
+async function loadAllData() {
+    await Promise.all([loadDIs(), loadBTs(), loadSorties()]);
+    updateDashboard();
+    renderPieces();
+}
+
+function refreshData() {
+    loadAllData();
+    toast('🔄 Données actualisées');
+}
+
+function setStatus(online, text) {
+    document.getElementById('statusDot').className = 'status-dot' + (online ? ' online' : '');
+    document.getElementById('statusText').textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════════
+function goToPage(pageId, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.action-bar').forEach(a => a.classList.remove('show'));
+    
+    document.getElementById(pageId).classList.add('active');
+    if (btn) btn.classList.add('active');
+    
+    if (pageId === 'pageSignal') {
+        document.getElementById('signalActionBar').classList.add('show');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIGNALEMENT (Opérateur crée DI - PAS de BT)
+// ═══════════════════════════════════════════════════════════════════════════
+function showSignalTab(tab) {
+    document.querySelectorAll('#pageSignal .tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#pageSignal .tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tab === 'new') {
+        document.querySelector('#pageSignal .tab-btn:first-child').classList.add('active');
+        document.getElementById('tabSignalNew').classList.add('active');
+        document.getElementById('signalActionBar').classList.add('show');
+    } else {
+        document.querySelector('#pageSignal .tab-btn:last-child').classList.add('active');
+        document.getElementById('tabSignalHistory').classList.add('active');
+        document.getElementById('signalActionBar').classList.remove('show');
+        renderMyDIs();
+    }
+}
+
+function initSignalForm() {
+    // Render lignes
+    const lignes = [...new Set((db.machines || []).map(m => m.Ligne).filter(Boolean))];
+    document.getElementById('lignesChips').innerHTML = lignes.map(l =>
+        `<div class="chip" onclick="selectLigne(this, '${l}')">${l}</div>`
+    ).join('');
+    
+    // Render techniciens
+    document.getElementById('techsGrid').innerHTML = (db.techniciens || []).map(t =>
+        `<div class="tech-item" onclick="toggleTech(this, '${t.Nom}')">
+            <input type="checkbox">
+            <span class="tech-name">${t.Nom}</span>
+        </div>`
+    ).join('');
+    
+    // Render anomalies
+    document.getElementById('anomaliesChips').innerHTML = (db.anomalies || []).map(a =>
+        `<div class="chip" onclick="selectAnomalie(this, '${a.Anomalie}')">${a.Anomalie}</div>`
+    ).join('');
+    
+    resetSignalForm();
+}
+
+function selectLigne(el, value) {
+    signalData = { ligne: value, machine: '', zone: '', composant: '', anomalie: '', techniciens: [], comment: '' };
+    
+    document.querySelectorAll('#lignesChips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    
+    // Filter and show machines
+    const machines = (db.machines || []).filter(m => m.Ligne === value);
+    document.getElementById('machinesChips').innerHTML = machines.map(m =>
+        `<div class="chip" onclick="selectMachine(this, '${m.Machine}')">${m.Machine}</div>`
+    ).join('');
+    
+    showStep(3);
+    hideSteps([4, 5, 6, 7, 8]);
+    document.getElementById('previewCard').classList.add('hidden');
+    updatePreview();
+}
+
+function selectMachine(el, value) {
+    signalData.machine = value;
+    signalData.zone = '';
+    signalData.composant = '';
+    
+    document.querySelectorAll('#machinesChips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    
+    // Filter and show zones
+    const zones = (db.zones || []).filter(z => z.Machine === value);
+    document.getElementById('zonesChips').innerHTML = zones.map(z =>
+        `<div class="chip" onclick="selectZone(this, '${z.Zone}')">${z.Zone}</div>`
+    ).join('');
+    
+    showStep(4);
+    hideSteps([5, 6, 7, 8]);
+    updatePreview();
+}
+
+function selectZone(el, value) {
+    signalData.zone = value;
+    signalData.composant = '';
+    
+    document.querySelectorAll('#zonesChips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    
+    // Filter and show composants
+    const composants = (db.composants || []).filter(c => c.Zone === value);
+    document.getElementById('composantsChips').innerHTML = composants.map(c =>
+        `<div class="chip" onclick="selectComposant(this, '${c.Composant}')">${c.Composant}</div>`
+    ).join('');
+    
+    showStep(5);
+    hideSteps([6, 7, 8]);
+    updatePreview();
+}
+
+function selectComposant(el, value) {
+    signalData.composant = value;
+    
+    document.querySelectorAll('#composantsChips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    
+    showSteps([6, 7, 8]);
+    document.getElementById('previewCard').classList.remove('hidden');
+    updatePreview();
+}
+
+function selectAnomalie(el, value) {
+    signalData.anomalie = value;
+    document.querySelectorAll('#anomaliesChips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePreview();
+}
+
+function toggleTech(el, name) {
+    el.classList.toggle('selected');
+    const cb = el.querySelector('input');
+    cb.checked = !cb.checked;
+    
+    if (cb.checked) {
+        if (!signalData.techniciens.includes(name)) signalData.techniciens.push(name);
+    } else {
+        signalData.techniciens = signalData.techniciens.filter(t => t !== name);
+    }
+    updatePreview();
+}
+
+function showStep(n) { document.getElementById('step' + n).classList.remove('hidden'); }
+function hideSteps(arr) { arr.forEach(n => document.getElementById('step' + n).classList.add('hidden')); }
+function showSteps(arr) { arr.forEach(n => document.getElementById('step' + n).classList.remove('hidden')); }
+
+function updatePreview() {
+    const comment = document.getElementById('commentInput').value;
+    const duration = timerSeconds > 0 ? formatDuration(timerSeconds) : '';
+    
+    let msg = `🚨 *DEMANDE D'INTERVENTION*\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `👤 ${user.nom}\n`;
+    if (signalData.ligne) msg += `📍 Ligne: ${signalData.ligne}\n`;
+    if (signalData.machine) msg += `⚙️ Machine: ${signalData.machine}\n`;
+    if (signalData.zone) msg += `🔧 Zone: ${signalData.zone}\n`;
+    if (signalData.composant) msg += `🔩 Composant: ${signalData.composant}\n`;
+    if (signalData.anomalie) msg += `⚠️ Anomalie: ${signalData.anomalie}\n`;
+    if (signalData.techniciens.length) msg += `👨‍🔧 Techniciens: ${signalData.techniciens.join(', ')}\n`;
+    if (duration) msg += `⏱️ Durée arrêt: ${duration}\n`;
+    if (comment) msg += `💬 ${comment}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n`;
+    msg += `⏳ Statut: En attente de traitement`;
+    
+    document.getElementById('previewBox').textContent = msg;
+    
+    // Enable/disable buttons
+    const valid = signalData.ligne && signalData.machine && signalData.zone && signalData.composant && signalData.anomalie;
+    document.getElementById('btnSaveDI').disabled = !valid;
+    document.getElementById('btnWhatsApp').disabled = !valid;
+}
+
+function resetSignalForm() {
+    signalData = { ligne: '', machine: '', zone: '', composant: '', anomalie: '', techniciens: [], comment: '' };
+    
+    document.querySelectorAll('#tabSignalNew .chip').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('#tabSignalNew .tech-item').forEach(t => {
+        t.classList.remove('selected');
+        t.querySelector('input').checked = false;
+    });
+    document.getElementById('commentInput').value = '';
+    
+    hideSteps([3, 4, 5, 6, 7, 8]);
+    document.getElementById('previewCard').classList.add('hidden');
+    document.getElementById('successBox').classList.add('hidden');
+    
+    // Show form cards
+    for (let i = 1; i <= 2; i++) {
+        document.getElementById('step' + i).classList.remove('hidden');
+    }
+    
+    resetTimer();
+    updatePreview();
+}
+
+// Timer functions
+function toggleTimer() {
+    if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timerStartBtn').textContent = '▶️ Démarrer';
+    } else {
+        timerInterval = setInterval(() => {
+            timerSeconds++;
+            document.getElementById('timerDisplay').textContent = formatDuration(timerSeconds);
+            updatePreview();
+        }, 1000);
+        timerRunning = true;
+        document.getElementById('timerStartBtn').textContent = '⏸️ Pause';
+    }
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = 0;
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+    document.getElementById('timerStartBtn').textContent = '▶️ Démarrer';
+}
+
+function formatDuration(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SAVE DI (Seulement DI, PAS de BT!)
+// ═══════════════════════════════════════════════════════════════════════════
+async function saveDI() {
+    const btn = document.getElementById('btnSaveDI');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Enregistrement...';
+    
+    const result = await apiCall('saveAnomalie', {
+        operateur: user.nom,
+        ligne: signalData.ligne,
+        machine: signalData.machine,
+        zone: signalData.zone,
+        composant: signalData.composant,
+        anomalie: signalData.anomalie,
+        techniciens: signalData.techniciens.join(', '),
+        duree: timerSeconds > 0 ? Math.ceil(timerSeconds / 60) : 0,
+        commentaire: document.getElementById('commentInput').value,
+        userId: user.id
+    });
+    
+    if (result.success) {
+        // Show success - Note: PAS de BT créé!
+        document.getElementById('successId').textContent = result.id;
+        
+        // Hide form, show success
+        for (let i = 1; i <= 8; i++) {
+            const step = document.getElementById('step' + i);
+            if (step) step.classList.add('hidden');
+        }
+        document.getElementById('previewCard').classList.add('hidden');
+        document.querySelector('.timer-card').classList.add('hidden');
+        document.getElementById('successBox').classList.remove('hidden');
+        document.getElementById('signalActionBar').classList.remove('show');
+        
+        toast('✅ DI enregistrée - En attente de traitement');
+        
+        await loadAllData();
+        
+        // Ask to send WhatsApp
+        if (signalData.techniciens.length > 0) {
+            setTimeout(() => {
+                if (confirm('Envoyer la notification WhatsApp aux techniciens ?')) {
+                    sendWhatsApp();
+                }
+            }, 500);
+        }
+        
+        // Auto reset after 3s
+        setTimeout(() => {
+            document.querySelector('.timer-card').classList.remove('hidden');
+            resetSignalForm();
+        }, 3000);
+        
+    } else {
+        toast('❌ Erreur: ' + (result.error || 'Erreur inconnue'));
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = '💾 Enregistrer DI';
+}
+
+function sendWhatsApp() {
+    const msg = document.getElementById('previewBox').textContent;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOAD DIs
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadDIs() {
+    const result = await apiCall('getAnomalies');
+    if (result.success) {
+        allDI = result.data || [];
+        updateDIBadges();
+        renderDIList();
+    }
+}
+
+function updateDIBadges() {
+    const waiting = allDI.filter(di => di.Statut === 'En attente').length;
+    document.getElementById('diWaitingCount').textContent = waiting;
+    document.getElementById('navDIBadge').textContent = waiting;
+    document.getElementById('navDIBadge').style.display = waiting > 0 ? 'flex' : 'none';
+    
+    // My DIs count
+    const myDIs = allDI.filter(di => di.Operateur === user.nom);
+    document.getElementById('myDICount').textContent = myDIs.length;
+}
+
+function renderMyDIs() {
+    const myDIs = allDI.filter(di => di.Operateur === user.nom);
+    
+    if (myDIs.length === 0) {
+        document.getElementById('myDIList').innerHTML = `
+            <div class="list-empty">
+                <div class="empty-icon">📭</div>
+                <div>Aucun signalement</div>
+            </div>
+        `;
+        return;
+    }
+    
+    document.getElementById('myDIList').innerHTML = myDIs.map(di => `
+        <div class="list-item">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-weight:700;color:${di.Statut === 'En attente' ? 'var(--danger)' : 'var(--success)'}">${di.ID}</span>
+                <span style="font-size:12px;color:var(--gray-400)">${di.Date} ${di.Heure || ''}</span>
+            </div>
+            <div style="font-weight:600;margin-bottom:4px">${di.Machine}</div>
+            <div style="font-size:13px;color:var(--gray-600)">${di.Anomalie}</div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                <span class="di-badge ${di.Statut === 'En attente' ? 'waiting' : 'done'}">${di.Statut}</span>
+                ${di.BT_ID ? `<span style="font-size:12px;color:var(--secondary);font-weight:600">→ ${di.BT_ID}</span>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAINTENANCE - DI LIST (Waiting)
+// ═══════════════════════════════════════════════════════════════════════════
+function showMaintTab(tab) {
+    document.querySelectorAll('#pageMaint .tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#pageMaint .tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tab === 'di') {
+        document.querySelector('#pageMaint .tab-btn:first-child').classList.add('active');
+        document.getElementById('tabMaintDI').classList.add('active');
+    } else {
+        document.querySelector('#pageMaint .tab-btn:last-child').classList.add('active');
+        document.getElementById('tabMaintBT').classList.add('active');
+    }
+}
+
+function renderDIList() {
+    const waiting = allDI.filter(di => di.Statut === 'En attente');
+    
+    if (waiting.length === 0) {
+        document.getElementById('diWaitingList').innerHTML = `
+            <div class="list-empty">
+                <div class="empty-icon">✅</div>
+                <div>Aucune DI en attente</div>
+            </div>
+        `;
+        return;
+    }
+    
+    document.getElementById('diWaitingList').innerHTML = waiting.map(di => `
+        <div class="di-card">
+            <div class="di-header">
+                <div>
+                    <div class="di-id">${di.ID}</div>
+                    <div class="di-date">${di.Date} ${di.Heure || ''}</div>
+                </div>
+                <span class="di-badge waiting">En attente</span>
+            </div>
+            <div class="di-machine">⚙️ ${di.Machine}</div>
+            <div class="di-info">📍 ${di.Ligne} | 🔧 ${di.Zone}</div>
+            <div class="di-info">🔩 ${di.Composant} | ⚠️ ${di.Anomalie}</div>
+            <div class="di-info">👤 Signalé par: ${di.Operateur}</div>
+            ${di.Duree ? `<div class="di-info">⏱️ Durée arrêt: ${di.Duree} min</div>` : ''}
+            <div class="di-actions">
+                <button class="di-btn primary" onclick="openTraitement('${di.ID}')">
+                    🔧 Traiter
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRAITEMENT DI → BT
+// ═══════════════════════════════════════════════════════════════════════════
+function openTraitement(diId) {
+    currentDI = allDI.find(di => di.ID === diId);
+    if (!currentDI) return;
+    
+    selectedPieces = [];
+    
+    // Fill modal info
+    document.getElementById('modalDIInfo').innerHTML = `
+        <div class="di-header">
+            <div>
+                <div class="di-id">${currentDI.ID}</div>
+                <div class="di-date">${currentDI.Date}</div>
+            </div>
+        </div>
+        <div class="di-machine">⚙️ ${currentDI.Machine}</div>
+        <div class="di-info">📍 ${currentDI.Ligne} | 🔧 ${currentDI.Zone}</div>
+        <div class="di-info">🔩 ${currentDI.Composant} | ⚠️ ${currentDI.Anomalie}</div>
+    `;
+    
+    // Reset form
+    document.getElementById('traitCause').value = '';
+    document.getElementById('traitDiag').value = '';
+    document.getElementById('traitAction').value = '';
+    document.getElementById('traitDetail').value = '';
+    document.getElementById('searchPieceModal').value = '';
+    
+    // Render pieces
+    renderModalPieces();
+    
+    openModal('modalTraitement');
+}
+
+function renderModalPieces(filter = '') {
+    let pieces = db.pieces || [];
+    if (filter) {
+        const f = filter.toLowerCase();
+        pieces = pieces.filter(p =>
+            (p.Code_JDE || '').toLowerCase().includes(f) ||
+            (p.Designation || '').toLowerCase().includes(f)
+        );
+    }
+    
+    document.getElementById('modalPiecesList').innerHTML = pieces.slice(0, 30).map(p => `
+        <div class="piece-item" onclick="togglePiece('${p.Code_JDE}', '${(p.Designation || '').replace(/'/g, "\\'")}', ${p.Stock || 0})">
+            <input type="checkbox" class="piece-check" ${selectedPieces.find(sp => sp.code === p.Code_JDE) ? 'checked' : ''}>
+            <div class="piece-info">
+                <div class="piece-code">${p.Code_JDE}</div>
+                <div class="piece-name">${p.Designation || '-'}</div>
+                <div class="piece-stock">Stock: ${p.Stock || 0}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    renderSelectedPieces();
+}
+
+function filterModalPieces() {
+    renderModalPieces(document.getElementById('searchPieceModal').value);
+}
+
+function togglePiece(code, name, stock) {
+    const idx = selectedPieces.findIndex(p => p.code === code);
+    if (idx >= 0) {
+        selectedPieces.splice(idx, 1);
+    } else {
+        selectedPieces.push({ code, name, stock, qty: 1 });
+    }
+    renderModalPieces(document.getElementById('searchPieceModal').value);
+}
+
+function renderSelectedPieces() {
+    if (selectedPieces.length === 0) {
+        document.getElementById('selectedPiecesDisplay').innerHTML = '<div style="color:var(--gray-400);font-size:13px">Aucune pièce sélectionnée</div>';
+        return;
+    }
+    
+    document.getElementById('selectedPiecesDisplay').innerHTML = selectedPieces.map((p, i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--gray-50);border-radius:10px;margin-bottom:8px">
+            <div style="flex:1">
+                <div style="font-weight:600;font-size:14px">${p.code}</div>
+                <div style="font-size:12px;color:var(--gray-500)">${p.name}</div>
+            </div>
+            <input type="number" value="${p.qty}" min="1" max="${p.stock}" 
+                style="width:60px;padding:8px;border:2px solid var(--gray-200);border-radius:8px;text-align:center"
+                onchange="updatePieceQty(${i}, this.value)">
+            <button onclick="removePiece(${i})" style="background:var(--danger);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer">✕</button>
+        </div>
+    `).join('');
+}
+
+function updatePieceQty(idx, qty) {
+    selectedPieces[idx].qty = parseInt(qty) || 1;
+}
+
+function removePiece(idx) {
+    selectedPieces.splice(idx, 1);
+    renderModalPieces(document.getElementById('searchPieceModal').value);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLOSE DI → GENERATE BT
+// ═══════════════════════════════════════════════════════════════════════════
+async function closeDI() {
+    if (!currentDI) return;
+    
+    const cause = document.getElementById('traitCause').value;
+    const diagnostic = document.getElementById('traitDiag').value;
+    const actionType = document.getElementById('traitAction').value;
+    const actionDetail = document.getElementById('traitDetail').value;
+    
+    if (!cause || !diagnostic || !actionType || !actionDetail) {
+        toast('⚠️ Veuillez remplir tous les champs obligatoires');
+        return;
+    }
+    
+    const btn = document.querySelector('#modalTraitement .btn-success');
+    btn.disabled = true;
+    btn.textContent = '⏳ Traitement...';
+    
+    const result = await apiCall('cloturerDI', {
+        diId: currentDI.ID,
+        technicien: user.nom,
+        cause,
+        diagnostic,
+        actionType,
+        actionDetail,
+        pieces: selectedPieces,
+        userId: user.id
+    });
+    
+    if (result.success) {
+        toast('✅ DI clôturée - BT généré: ' + result.btId);
+        closeModal('modalTraitement');
+        await loadAllData();
+        
+        // Propose WhatsApp notification
+        if (confirm('Envoyer une notification WhatsApp à l\'opérateur ?')) {
+            sendBTNotification(result.btId, currentDI);
+        }
+    } else {
+        toast('❌ Erreur: ' + (result.error || 'Erreur inconnue'));
+    }
+    
+    btn.disabled = false;
+    btn.textContent = '✅ Clôturer DI et Générer BT';
+}
+
+function sendBTNotification(btId, di) {
+    let msg = `✅ *INTERVENTION TERMINÉE*\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `📋 BT: ${btId}\n`;
+    msg += `🔗 Réf DI: ${di.ID}\n`;
+    msg += `⚙️ Machine: ${di.Machine}\n`;
+    msg += `⚠️ Anomalie: ${di.Anomalie}\n`;
+    msg += `👨‍🔧 Technicien: ${user.nom}\n`;
+    msg += `📅 ${new Date().toLocaleDateString('fr-FR')}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━`;
+    
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+            </div>
+            <div class="bt-grid">
+                <div class="bt-section">
+                    <div class="bt-section-title">Machine</div>
+                    <div class="bt-section-value">${bt.Machine || '-'}</div>
+                </div>
+                <div class="bt-section">
+                    <div class="bt-section-title">Technicien</div>
+                    <div class="bt-section-value">${bt.Technicien || '-'}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterBTs() {
+    renderBTList(document.getElementById('searchBT').value);
+}
+
+function openBTDetail(btId) {
+    currentBT = allBT.find(b => b.BT_ID === btId);
+    if (!currentBT) return;
+    
+    let piecesHtml = '';
+    if (currentBT.Pieces) {
+        try {
+            const pieces = JSON.parse(currentBT.Pieces);
+            if (pieces.length) {
+                piecesHtml = `
+                    <div class="bt-section" style="background:var(--gray-100);margin-top:12px">
+                        <div class="bt-section-title" style="color:var(--gray-600)">Pièces utilisées</div>
+                        ${pieces.map(p => `<div style="font-size:14px;margin-top:6px">• ${p.code} × ${p.qty}</div>`).join('')}
+                    </div>
+                `;
+            }
+        } catch(e) {}
+    }
+    
+    document.getElementById('modalBTContent').innerHTML = `
+        <div class="bt-card" style="cursor:default">
+            <div class="bt-header">
+                <div>
+                    <div class="bt-id">${currentBT.BT_ID}</div>
+                    <div class="bt-ref">Réf DI: ${currentBT.DI_ID}</div>
+                </div>
+                <span style="font-size:13px">${currentBT.Date}</span>
+            </div>
+            <div class="bt-section">
+                <div class="bt-section-title">Machine</div>
+                <div class="bt-section-value">${currentBT.Machine || '-'}</div>
+            </div>
+            <div class="bt-grid">
+                <div class="bt-section">
+                    <div class="bt-section-title">Cause</div>
+                    <div class="bt-section-value">${currentBT.Cause || '-'}</div>
+                </div>
+                <div class="bt-section">
+                    <div class="bt-section-title">Type action</div>
+                    <div class="bt-section-value">${currentBT.Action_Type || '-'}</div>
+                </div>
+            </div>
+            <div class="bt-section">
+                <div class="bt-section-title">Diagnostic</div>
+                <div class="bt-section-value">${currentBT.Diagnostic || '-'}</div>
+            </div>
+            <div class="bt-section">
+                <div class="bt-section-title">Détail action</div>
+                <div class="bt-section-value">${currentBT.Action_Detail || '-'}</div>
+            </div>
+            ${piecesHtml}
+            <div class="bt-section">
+                <div class="bt-section-title">Technicien</div>
+                <div class="bt-section-value">${currentBT.Technicien || '-'}</div>
+            </div>
+        </div>
+    `;
+    
+    openModal('modalBT');
+}
+
+function printBT() {
+    if (!currentBT) return;
+    
+    let piecesRows = '';
+    if (currentBT.Pieces) {
+        try {
+            const pieces = JSON.parse(currentBT.Pieces);
+            piecesRows = pieces.map(p => `<tr><td>${p.code}</td><td>${p.name || '-'}</td><td>${p.qty}</td></tr>`).join('');
+        } catch(e) {}
+    }
+    
+    document.getElementById('printArea').innerHTML = `
+        <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:15px;margin-bottom:20px">
+            <h1 style="font-size:24px;margin-bottom:5px">BON DE TRAVAIL</h1>
+            <p style="font-size:14px;color:#666">GMAO BAHIA - Les Eaux Minérales d'Oulmès</p>
+        </div>
+        <div style="margin-bottom:20px">
+            <p><strong>N° BT:</strong> ${currentBT.BT_ID}</p>
+            <p><strong>Réf DI:</strong> ${currentBT.DI_ID}</p>
+            <p><strong>Date:</strong> ${currentBT.Date}</p>
+        </div>
+        <div style="margin-bottom:20px">
+            <h3 style="border-bottom:1px solid #ccc;padding-bottom:5px">Équipement</h3>
+            <p><strong>Machine:</strong> ${currentBT.Machine || '-'}</p>
+            <p><strong>Ligne:</strong> ${currentBT.Ligne || '-'}</p>
+            <p><strong>Zone:</strong> ${currentBT.Zone || '-'}</p>
+        </div>
+        <div style="margin-bottom:20px">
+            <h3 style="border-bottom:1px solid #ccc;padding-bottom:5px">Intervention</h3>
+            <p><strong>Cause:</strong> ${currentBT.Cause || '-'}</p>
+            <p><strong>Diagnostic:</strong> ${currentBT.Diagnostic || '-'}</p>
+            <p><strong>Type action:</strong> ${currentBT.Action_Type || '-'}</p>
+            <p><strong>Détail:</strong> ${currentBT.Action_Detail || '-'}</p>
+            <p><strong>Technicien:</strong> ${currentBT.Technicien || '-'}</p>
+        </div>
+        ${piecesRows ? `
+        <div style="margin-bottom:20px">
+            <h3 style="border-bottom:1px solid #ccc;padding-bottom:5px">Pièces utilisées</h3>
+            <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="background:#f0f0f0"><th style="border:1px solid #333;padding:8px">Code</th><th style="border:1px solid #333;padding:8px">Désignation</th><th style="border:1px solid #333;padding:8px">Qté</th></tr></thead>
+                <tbody>${piecesRows}</tbody>
+            </table>
+        </div>
+        ` : ''}
+        <div style="margin-top:50px">
+            <p><strong>Signature technicien:</strong> _______________________</p>
+        </div>
+    `;
+    
+    document.getElementById('printArea').style.display = 'block';
+    window.print();
+    document.getElementById('printArea').style.display = 'none';
+}
+
+function shareBTWhatsApp() {
+    if (!currentBT) return;
+    
+    let msg = `📄 *BON DE TRAVAIL*\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `📋 ${currentBT.BT_ID}\n`;
+    msg += `🔗 Réf: ${currentBT.DI_ID}\n`;
+    msg += `📅 ${currentBT.Date}\n`;
+    msg += `⚙️ ${currentBT.Machine}\n`;
+    msg += `🔧 Cause: ${currentBT.Cause || '-'}\n`;
+    msg += `🛠️ Action: ${currentBT.Action_Type || '-'}\n`;
+    msg += `👨‍🔧 ${currentBT.Technicien}\n`;
+    
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PDR - STOCK
+// ═══════════════════════════════════════════════════════════════════════════
+function showPDRTab(tab) {
+    document.querySelectorAll('#pagePDR .tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#pagePDR .tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tab === 'stock') {
+        document.querySelector('#pagePDR .tab-btn:first-child').classList.add('active');
+        document.getElementById('tabPDRStock').classList.add('active');
+    } else {
+        document.querySelector('#pagePDR .tab-btn:last-child').classList.add('active');
+        document.getElementById('tabPDRSorties').classList.add('active');
+        renderSorties();
+    }
+}
+
+function renderPieces(filter = '') {
+    let pieces = db.pieces || [];
+    if (filter) {
+        const f = filter.toLowerCase();
+        pieces = pieces.filter(p =>
+            (p.Code_JDE || '').toLowerCase().includes(f) ||
+            (p.Designation || '').toLowerCase().includes(f)
+        );
+    }
+    
+    if (pieces.length === 0) {
+        document.getElementById('piecesList').innerHTML = `
+            <div class="list-empty">
+                <div class="empty-icon">📭</div>
+                <div>Aucune pièce trouvée</div>
+            </div>
+        `;
+        return;
+    }
+    
+    document.getElementById('piecesList').innerHTML = pieces.slice(0, 100).map(p => {
+        const stock = parseInt(p.Stock) || 0;
+        const seuil = parseInt(p.Seuil_Alerte) || 5;
+        const isLow = stock <= seuil;
+        
+        return `
+            <div class="piece-item">
+                <div class="piece-info">
+                    <div class="piece-code">${p.Code_JDE}</div>
+                    <div class="piece-name">${p.Designation || '-'}</div>
+                    <div class="piece-stock">
+                        Stock: <strong style="color:${isLow ? 'var(--danger)' : 'var(--success)'}">${stock}</strong> ${p.Unite || 'U'}
+                        ${isLow ? '<span class="stock-low">⚠️ Stock bas</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterPieces() {
+    renderPieces(document.getElementById('searchPiece').value);
+}
+
+async function loadSorties() {
+    const result = await apiCall('getSorties');
+    if (result.success) {
+        allSorties = result.data || [];
+    }
+}
+
+function renderSorties() {
+    if (allSorties.length === 0) {
+        document.getElementById('sortiesList').innerHTML = `
+            <div class="list-empty">
+                <div class="empty-icon">📭</div>
+                <div>Aucune sortie enregistrée</div>
+            </div>
+        `;
+        return;
+    }
+    
+    document.getElementById('sortiesList').innerHTML = allSorties.slice(0, 50).map(s => `
+        <div class="list-item">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-weight:700;color:var(--secondary)">${s.BT_ID || '-'}</span>
+                <span style="font-size:12px;color:var(--gray-400)">${s.Date}</span>
+            </div>
+            <div style="font-weight:600">${s.Code}</div>
+            <div style="font-size:13px;color:var(--gray-600)">${s.Designation || '-'}</div>
+            <div style="font-size:13px;margin-top:4px">Quantité: <strong>${s.Quantite}</strong></div>
+        </div>
+    `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+function updateDashboard() {
+    const diWaiting = allDI.filter(di => di.Statut === 'En attente').length;
+    const btCount = allBT.length;
+    
+    const now = new Date();
+    const thisMonth = allBT.filter(bt => {
+        if (!bt.Date) return false;
+        try {
+            const parts = bt.Date.split('/');
+            const btDate = new Date(parts[2], parts[1] - 1, parts[0]);
+            return btDate.getMonth() === now.getMonth() && btDate.getFullYear() === now.getFullYear();
+        } catch(e) { return false; }
+    }).length;
+    
+    const stockCritique = (db.pieces || []).filter(p => {
+        const stock = parseInt(p.Stock) || 0;
+        const seuil = parseInt(p.Seuil_Alerte) || 5;
+        return stock <= seuil;
+    }).length;
+    
+    document.getElementById('statDI').textContent = diWaiting;
+    document.getElementById('statBT').textContent = thisMonth;
+    document.getElementById('statResolved').textContent = allDI.filter(d => d.Statut === 'Clôturé').length;
+    document.getElementById('statStock').textContent = stockCritique;
+    
+    // Recent activity
+    const recent = [...allBT].slice(0, 5);
+    if (recent.length === 0) {
+        document.getElementById('recentActivity').innerHTML = `
+            <div class="list-empty">
+                <div class="empty-icon">📭</div>
+                <div>Aucune activité récente</div>
+            </div>
+        `;
+    } else {
+        document.getElementById('recentActivity').innerHTML = recent.map(bt => `
+            <div class="list-item" style="cursor:pointer" onclick="goToPage('pageMaint', document.querySelectorAll('.nav-btn')[2]); showMaintTab('bt');">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span style="font-weight:700;color:var(--secondary)">${bt.BT_ID}</span>
+                    <span style="font-size:12px;color:var(--gray-400)">${bt.Date}</span>
+                </div>
+                <div style="font-size:14px">${bt.Machine || '-'} - ${bt.Cause || '-'}</div>
+            </div>
+        `).join('');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════
+function openModal(id) {
+    document.getElementById(id).classList.add('show');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modals on backdrop click
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+    }
+});
+</script>
+</body>
+</html>
