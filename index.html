@@ -652,7 +652,7 @@
         const url=localStorage.getItem('bahia_url'),token=localStorage.getItem('bahia_token');
         if(!url||!token){setStatus(false,'Non configuré');return}
         try{
-            const r=await fetch(`${url}?token=${encodeURIComponent(token)}`);
+            const r=await fetch(`${url}?data=${encodeURIComponent(JSON.stringify({action:'getData',token:token}))}`);
             db=await r.json();
             if(db.error)throw new Error(db.error);
             setStatus(true,'Connecté');
