@@ -525,10 +525,45 @@ function renderDIList() {
 <div class="di-info">⚠️ ${di.Anomalie || '-'}</div>
 <div class="di-info">👤 ${di.Operateur || '-'}</div>
 <div class="di-actions">
-<button class="di-btn primary" onclick="event.stopPropagation();openTraitement('${di.ID}')">🔧 Traiter</button>
+<button class="di-btn primary" onclick="event.stopPropagation();startIntervention('${di.ID}')">▶️ Prendre en charge</button>
 </div>
 </div>`).join('');
 }
+
+async function startIntervention(diId) {
+    if (!confirm('Démarrer l\'intervention maintenant ?\nCela créera un BT "En cours" et marquera votre heure d\'arrivée.')) return;
+    
+    // Create BT with "In Progress" placeholder data
+    const result = await api('cloturerDI', { 
+        diId: diId, 
+        technicien: user.nom, 
+        cause: "Intervention démarrée", 
+        diagnostic: "En cours de diagnostic", 
+        actionType: "Correctif", 
+        actionDetail: "Prise en charge par " + user.nom, 
+        pieces: "", 
+        userId: user.id 
+    });
+
+    if (result.success) {
+        toast('✅ Intervention démarrée (BT: ' + result.btId + ')');
+        // Force status to "En cours" and set Arrival Time
+        const now = new Date();
+        const heureArrivee = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        
+        await api('updateBTStatut', { 
+            btId: result.btId, 
+            newStatut: 'En cours', 
+            comment: 'Début intervention', 
+            userName: user.nom,
+            heureArrivee: heureArrivee
+        });
+        await loadAllData();
+    } else {
+        toast('❌ ' + (result.error || 'Erreur'));
+    }
+}
+
 
 function renderHistoriqueDI() {
     const search = (document.getElementById('searchHistDI').value || '').toLowerCase();
@@ -631,8 +666,84 @@ function openTraitement(diId) {
     currentDI = allDI.find(di => di.ID === diId); if (!currentDI) return;
     document.getElementById('modalDIInfo').innerHTML = `<div class="di-header"><div><div class="di-id">${currentDI.ID}</div><div class="di-date">${currentDI.Date || ''}</div></div></div><div class="di-machine">⚙️ ${currentDI.Machine}</div><div class="di-info">📍 ${currentDI.Ligne} | 🔧 ${currentDI.Zone} | 🔩 ${currentDI.Composant}</div><div class="di-info">⚠️ ${currentDI.Anomalie}</div>${currentDI.Description ? `<div class="di-info">📝 ${currentDI.Description}</div>` : ''}`;
     document.getElementById('traitCause').value = ''; document.getElementById('traitDiag').value = ''; document.getElementById('traitAction').value = ''; document.getElementById('traitDetail').value = '';
+    
+    // Reset Modal for DI processing
+    document.querySelector('#modalTraitement .modal-header h3').textContent = '🔧 Traiter DI';
+    const btn = document.getElementById('btnCloseDI');
+    btn.innerHTML = '✅ Clôturer et Générer BT';
+    btn.onclick = closeDI;
+    
     openModal('modalTraitement');
 }
+
+function openFinishBT(btId) {
+    currentBT = allBT.find(b => b.BT_ID === btId); if (!currentBT) return;
+    const di = allDI.find(d => d.ID === currentBT.Anomalie_ID);
+    
+    // Reuse modalTraitement layout
+    document.getElementById('modalDIInfo').innerHTML = `<div class="bt-header"><div><div class="bt-id">${currentBT.BT_ID}</div><div class="bt-ref">Réf: ${currentBT.Anomalie_ID || '-'}</div></div><span class="bt-statut ${getStatutClass(currentBT.Statut)}">${currentBT.Statut}</span></div><div class="di-machine">⚙️ ${currentBT.Machine || '-'}</div><div class="di-info">⚠️ ${di ? di.Anomalie : '-'}</div>`;
+    
+    // Clear previous values
+    document.getElementById('traitCause').value = '';
+    document.getElementById('traitDiag').value = '';
+    document.getElementById('traitAction').value = '';
+    document.getElementById('traitDetail').value = '';
+    document.getElementById('traitPieces').value = ''; 
+    
+    // Update Modal Title and Button
+    document.querySelector('#modalTraitement .modal-header h3').textContent = '✅ Clôture Technique';
+    const btn = document.getElementById('btnCloseDI');
+    btn.innerHTML = '💾 Enregistrer & Terminer';
+    btn.onclick = finishBT; 
+    
+    openModal('modalTraitement');
+}
+
+async function finishBT() {
+    if (!currentBT) return;
+    const cause = document.getElementById('traitCause').value;
+    const diagnostic = document.getElementById('traitDiag').value;
+    const actionType = document.getElementById('traitAction').value;
+    const actionDetail = document.getElementById('traitDetail').value;
+    const pieces = document.getElementById('traitPieces').value;
+    
+    if (!cause || !diagnostic || !actionType || !actionDetail) { toast('⚠️ Remplir tous les champs obligatoires'); return; }
+    
+    const btn = document.getElementById('btnCloseDI'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    
+    // 1. Update BT Details
+    const updateResult = await api('updateBT', {
+        btId: currentBT.BT_ID,
+        cause, diagnostic, actionType, actionDetail, pieces
+    });
+    
+    if (updateResult.success) {
+        // 2. Set Status to Terminé with Heure Fin
+        const now = new Date();
+        const heureFin = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        
+        const statutResult = await api('updateBTStatut', {
+            btId: currentBT.BT_ID,
+            newStatut: 'Terminé',
+            comment: 'Clôture technique par technicien',
+            userName: user.nom,
+            heureFin: heureFin,
+            heureArrivee: currentBT.Heure_Arrivee
+        });
+        
+        if (statutResult.success) {
+            toast('✅ Intervention terminée!');
+            closeModal('modalTraitement');
+            await loadAllData();
+        } else {
+            toast('❌ Erreur statut: ' + statutResult.error);
+        }
+    } else {
+        toast('❌ Erreur mise à jour: ' + updateResult.error);
+    }
+    btn.disabled = false; btn.innerHTML = '✅ Clôturer et Générer BT';
+}
+
 
 async function closeDI() {
     if (!currentDI) return;
@@ -729,6 +840,7 @@ ${statut === 'Validé' ? `<div style="margin-top:12px;padding:12px;background:#d
 </div>`: ''}
 ${historiqueHTML}
 <div style="display:flex;gap:10px;margin-top:16px">
+${(currentBT.Statut === 'En cours' || currentBT.Statut === 'En attente pièces') && (user.role === 'technicien' || user.role === 'chef_equipe' || user.role === 'admin') ? `<button class="btn btn-success" style="flex:1" onclick="openFinishBT('${currentBT.BT_ID}');closeModal('modalBT')">✅ Terminer</button>` : ''}
 ${canEditBT(currentBT) ? `<button class="btn btn-warning" style="flex:1" onclick="openEditBT('${currentBT.BT_ID}');closeModal('modalBT')">✏️ Éditer</button>` : ''}
 <button class="btn btn-primary" style="flex:1" onclick="openChangeStatut('${currentBT.BT_ID}');closeModal('modalBT')">📊 Changer statut</button>
 ${canDeleteBT(currentBT) ? `<button class="btn" style="flex:1;background:var(--danger);color:#fff" onclick="closeModal('modalBT');confirmDeleteBT('${currentBT.BT_ID}')">🗑️ Supprimer</button>` : ''}

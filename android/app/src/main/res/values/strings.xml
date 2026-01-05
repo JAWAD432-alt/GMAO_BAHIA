@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GMAO BAHIA</string>
+    <string name="title_activity_main">GMAO BAHIA</string>
+    <string name="package_name">com.gmaobahia.app</string>
+    <string name="custom_url_scheme">com.gmaobahia.app</string>
+</resources>
