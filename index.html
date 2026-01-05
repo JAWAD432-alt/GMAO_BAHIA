@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1e40af">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>GMAO BAHIA v8.5</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-page" id="loginPage">
+<div class="login-header"><div class="login-logo">🏭</div><h1>GMAO BAHIA</h1><p>v8.5 - Push Notifications</p></div>
+<div class="login-card">
+<h2>Connexion</h2>
+<div class="login-error" id="loginError"></div>
+<div class="form-group"><label>Identifiant</label><div class="input-box"><span class="icon">👤</span><input type="text" id="loginUser" placeholder="Identifiant"></div></div>
+<div class="form-group"><label>Mot de passe</label><div class="input-box"><span class="icon">🔒</span><input type="password" id="loginPass" placeholder="Mot de passe"></div></div>
+<button class="btn-login" id="btnLogin">🚀 Connexion</button>
+</div>
+</div>
+<div class="app" id="mainApp">
+<header class="header">
+<div class="header-top">
+<div class="header-user"><div class="avatar" id="userAvatar">A</div><div class="user-info"><h1 id="userName">Utilisateur</h1><div class="role" id="userRole">-</div></div></div>
+<div class="header-actions">
+<button class="header-btn" id="btnNotif" onclick="toggleNotifications()" style="position:relative">🔔<span class="notif-badge" id="notifBadge" style="position:absolute;top:-5px;right:-5px">0</span></button>
+<button class="header-btn" id="btnRefresh">🔄</button>
+<button class="header-btn danger" id="btnLogout">🚪</button>
+</div>
+</div>
+<div class="status-bar"><div class="status-dot" id="statusDot"></div><span id="statusText">Connexion...</span></div>
+</header>
+<!-- Panel Notifications -->
+<div class="notif-panel" id="notifPanel">
+<div class="notif-header">
+<h3>🔔 Notifications</h3>
+<button class="btn btn-secondary" style="padding:8px 12px;font-size:12px" onclick="clearNotifications()">Tout effacer</button>
+</div>
+<div id="pushNotifBanner" class="push-banner">
+<div style="flex:1">
+<div style="font-weight:600;font-size:13px">📱 Notifications Push</div>
+<div style="font-size:11px;color:var(--gray-500)">Recevoir les alertes même app fermée</div>
+</div>
+<button class="btn btn-primary" style="padding:8px 16px;font-size:12px" id="btnEnablePush" onclick="requestPushPermission()">Activer</button>
+</div>
+<div id="notifList"><div class="list-empty" style="padding:30px"><div class="empty-icon" style="font-size:40px">🔕</div>Aucune notification</div></div>
+</div>
+<div class="page active" id="pageHome">
+<h2 class="page-title">📊 Tableau de bord</h2>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-value" id="statDI">0</div><div class="stat-label">DI en attente</div></div>
+<div class="stat-card success"><div class="stat-value" id="statBT">0</div><div class="stat-label">BT en cours</div></div>
+<div class="stat-card warning"><div class="stat-value" id="statTermine">0</div><div class="stat-label">À valider</div></div>
+<div class="stat-card danger"><div class="stat-value" id="statRetard">0</div><div class="stat-label">En retard</div></div>
+</div>
+<div class="card" style="margin-top:16px">
+<div class="card-header"><div class="card-icon blue">📈</div><div class="card-title">Indicateurs Performance</div></div>
+<div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
+<div class="kpi-box"><div class="kpi-value" id="kpiMTBF">--</div><div class="kpi-label">MTBF (h)</div><div class="kpi-desc">Temps moyen entre pannes</div></div>
+<div class="kpi-box"><div class="kpi-value" id="kpiMTTR">--</div><div class="kpi-label">MTTR (min)</div><div class="kpi-desc">Temps moyen de réparation</div></div>
+</div>
+<div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
+<div class="kpi-box"><div class="kpi-value" id="kpiDispo">--</div><div class="kpi-label">Disponibilité %</div><div class="kpi-desc">MTBF/(MTBF+MTTR)</div></div>
+<div class="kpi-box"><div class="kpi-value" id="kpiNbPannes">0</div><div class="kpi-label">Pannes (30j)</div><div class="kpi-desc">Nombre total</div></div>
+</div>
+</div>
+<div class="card" style="margin-top:16px">
+<div class="card-header"><div class="card-icon orange">📋</div><div class="card-title">Activité récente</div></div>
+<div id="recentActivity" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div><div style="font-weight:700;color:var(--danger);margin-bottom:8px;font-size:13px">🚨 DI</div><div id="recentDIList"><div class="list-empty" style="padding:20px"><div class="empty-icon" style="font-size:32px">📭</div>Aucune DI</div></div></div>
+<div><div style="font-weight:700;color:var(--warning);margin-bottom:8px;font-size:13px">📄 BT</div><div id="recentBTList"><div class="list-empty" style="padding:20px"><div class="empty-icon" style="font-size:32px">📭</div>Aucun BT</div></div></div>
+</div>
+</div>
+</div>
+<div class="page" id="pageSignal">
+<h2 class="page-title">🚨 Signalement</h2>
+<div class="tabs"><button class="tab-btn active" data-tab="new">➕ Nouveau</button><button class="tab-btn" data-tab="history">📜 Mes DI<span class="tab-badge" id="myDICount">0</span></button></div>
+<div class="tab-content active" id="tabSignalNew">
+<div class="card"><div class="card-header"><div class="card-icon purple">🕐</div><div class="card-title">Horaires</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div><label class="form-label">Heure signalement *</label><div style="display:flex;gap:8px"><input type="time" class="form-input" id="heureSignal" style="flex:1;font-size:18px;text-align:center;padding:14px"><button type="button" class="btn btn-secondary" onclick="setCurrentTime('heureSignal')" style="padding:14px">⏱️</button></div></div>
+<div><label class="form-label">Arrivée maintenance</label><div style="display:flex;gap:8px"><input type="time" class="form-input" id="heureFinOp" style="flex:1;font-size:18px;text-align:center;padding:14px"><button type="button" class="btn btn-secondary" onclick="setCurrentTime('heureFinOp')" style="padding:14px">⏱️</button></div></div>
+</div>
+</div>
+<div class="card" id="step1"><div class="card-header"><div class="card-icon blue">1️⃣</div><div class="card-title">Opérateur</div></div><div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:14px 18px;border-radius:14px;display:flex;align-items:center;gap:12px"><span style="font-size:28px">👤</span><div><div style="font-weight:700" id="opName">-</div><div style="font-size:13px;opacity:.9">Opérateur</div></div></div></div>
+<div class="card" id="step2"><div class="card-header"><div class="card-icon blue">2️⃣</div><div class="card-title">Ligne</div></div><div class="chips" id="lignesChips"></div></div>
+<div class="card hidden" id="step3"><div class="card-header"><div class="card-icon blue">3️⃣</div><div class="card-title">Machine</div></div><div class="chips" id="machinesChips"></div></div>
+<div class="card hidden" id="step4"><div class="card-header"><div class="card-icon blue">4️⃣</div><div class="card-title">Zone</div></div><div class="chips" id="zonesChips"></div></div>
+<div class="card hidden" id="step5"><div class="card-header"><div class="card-icon blue">5️⃣</div><div class="card-title">Composant</div></div><div class="chips" id="composantsChips"></div></div>
+<div class="card hidden" id="step6"><div class="card-header"><div class="card-icon red">6️⃣</div><div class="card-title">Anomalie</div></div><div class="chips" id="anomaliesChips"></div></div>
+<div class="card hidden" id="step7"><div class="card-header"><div class="card-icon purple">7️⃣</div><div class="card-title">Description standardisée</div></div><select class="form-select" id="descriptionSelect"><option value="">-- Sélectionner --</option></select></div>
+<div class="card hidden" id="step8"><div class="card-header"><div class="card-icon orange">8️⃣</div><div class="card-title">Techniciens</div></div><div id="techsContainer"></div></div>
+<div class="card hidden" id="step9"><div class="card-header"><div class="card-icon green">9️⃣</div><div class="card-title">Commentaire</div></div><textarea class="form-textarea" id="commentInput" placeholder="Commentaire libre..."></textarea></div>
+<div class="card hidden" id="step10"><div class="card-header"><div class="card-icon blue">📷</div><div class="card-title">Photo (optionnel)</div></div><div class="photo-upload"><input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none"><button class="photo-btn" id="btnTakePhoto">📷 Prendre photo</button><div class="photo-preview hidden" id="photoPreview"><img id="photoImg" src=""><button class="photo-remove" id="btnRemovePhoto">✕</button></div></div></div>
+<div class="card hidden" id="previewCard"><div class="card-header"><div class="card-icon orange">👁️</div><div class="card-title">Aperçu</div></div><div class="preview-box" id="previewBox"></div></div>
+<div class="success-box hidden" id="successBox"><div class="success-icon">✅</div><h3>DI Enregistrée!</h3><p>Envoyez WhatsApp maintenant</p><div class="success-id" id="successId">DI-XXXXXX-X</div></div>
+</div>
+<div class="tab-content" id="tabSignalHistory"><div id="myDIList"><div class="list-empty"><div class="empty-icon">📭</div>Aucun signalement</div></div></div>
+</div>
+<div class="page" id="pageMaint">
+<h2 class="page-title">🔧 Maintenance</h2>
+<div class="tabs">
+<button class="tab-btn active" data-tab="di">📋 DI à traiter <span class="tab-badge" id="diWaitingCount">0</span></button>
+<button class="tab-btn" data-tab="bt">📄 Bons de Travail <span class="tab-badge" id="btCount">0</span></button>
+</div>
+<div class="tab-content active" id="tabMaintDI"><div id="diWaitingList"><div class="list-empty"><div class="empty-icon">✅</div>Aucune DI</div></div></div>
+<div class="tab-content" id="tabMaintBT"><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchBT" placeholder="Rechercher BT..."></div><div id="btList"><div class="list-empty"><div class="empty-icon">📭</div>Aucun BT</div></div></div>
+</div>
+<div class="page" id="pageHistorique">
+<h2 class="page-title">📋 Historique</h2>
+<div class="tabs">
+<button class="tab-btn active" data-tab="histDI">📝 DI</button>
+<button class="tab-btn" data-tab="histBT">📄 BT</button>
+</div>
+<div class="tab-content active" id="tabHistDI"><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchHistDI" placeholder="Rechercher..."></div><div id="histDIList"><div class="list-empty"><div class="empty-icon">📭</div>Aucune DI</div></div></div>
+<div class="tab-content" id="tabHistBT"><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchHistBT" placeholder="Rechercher..."></div><div id="histBTList"><div class="list-empty"><div class="empty-icon">📭</div>Aucun BT</div></div></div>
+</div>
+<div class="page" id="pageValidation">
+<h2 class="page-title">✔️ Validation BT</h2>
+<div id="btToValidateList"><div class="list-empty"><div class="empty-icon">✅</div>Aucun BT à valider</div></div>
+</div>
+<nav class="bottom-nav" id="bottomNav">
+<button class="nav-btn active" data-page="pageHome"><span class="nav-icon">🏠</span><span>Accueil</span></button>
+<button class="nav-btn" data-page="pageSignal" id="navSignal"><span class="nav-icon">🚨</span><span>Signaler</span></button>
+<button class="nav-btn" data-page="pageMaint" id="navMaint"><span class="nav-icon">🔧</span><span>Maintenance</span><span class="notif-badge" id="navMaintBadge">0</span></button>
+<button class="nav-btn" data-page="pageHistorique" id="navHistorique"><span class="nav-icon">📋</span><span>Historique</span></button>
+<button class="nav-btn" data-page="pageValidation" id="navValidation"><span class="nav-icon">✔️</span><span>Valider</span><span class="notif-badge" id="navValidBadge">0</span></button>
+</nav>
+<div class="action-bar" id="signalActionBar"><div class="action-buttons"><button class="btn btn-primary" id="btnSaveDI" disabled>💾 Enregistrer</button><button class="btn btn-whatsapp" id="btnWhatsApp" disabled>📱</button></div></div>
+</div>
+<div class="modal" id="modalTraitement">
+<div class="modal-content">
+<div class="modal-header"><h3>🔧 Traiter DI</h3><button class="modal-close" onclick="closeModal('modalTraitement')">✕</button></div>
+<div class="di-card" id="modalDIInfo"></div>
+<div class="form-group"><label class="form-label">Cause *</label><select class="form-select" id="traitCause"><option value="">-- Sélectionner --</option><option>Usure normale</option><option>Défaut matériel</option><option>Erreur opérateur</option><option>Manque maintenance</option><option>Autre</option></select></div>
+<div class="form-group"><label class="form-label">Diagnostic *</label><textarea class="form-textarea" id="traitDiag" placeholder="Diagnostic..."></textarea></div>
+<div class="form-group"><label class="form-label">Type action *</label><select class="form-select" id="traitAction"><option value="">-- Sélectionner --</option><option>Correctif</option><option>Préventif</option><option>Amélioratif</option></select></div>
+<div class="form-group"><label class="form-label">Détail action *</label><textarea class="form-textarea" id="traitDetail" placeholder="Action réalisée..."></textarea></div>
+<div class="form-group"><label class="form-label">Pièces utilisées</label><textarea class="form-textarea" id="traitPieces" placeholder="Ex: Joint torique x2, Roulement SKF 6205..."></textarea></div>
+<button class="btn btn-success" style="width:100%;margin-top:16px" id="btnCloseDI">✅ Clôturer et Générer BT</button>
+</div>
+</div>
+<div class="modal" id="modalStatutBT">
+<div class="modal-content">
+<div class="modal-header"><h3>📊 Changer Statut</h3><button class="modal-close" onclick="closeModal('modalStatutBT')">✕</button></div>
+<div class="bt-card" id="modalStatutBTInfo"></div>
+<div class="statut-workflow"><div class="statut-title">Workflow:</div><div class="statut-steps"><div class="statut-step" data-statut="En cours">🔧 En cours</div><div class="statut-arrow">→</div><div class="statut-step" data-statut="En attente pièces">📦 Attente</div><div class="statut-arrow">→</div><div class="statut-step" data-statut="Terminé">✅ Terminé</div><div class="statut-arrow">→</div><div class="statut-step" data-statut="Validé">✔️ Validé</div></div></div>
+<div class="form-group"><label class="form-label">Nouveau statut</label><select class="form-select" id="selectNewStatut" onchange="onStatutChange()"></select></div>
+<div id="horairesIntervention" class="card" style="background:var(--gray-50);display:none;margin:16px 0">
+<div class="card-header" style="margin-bottom:12px"><div class="card-icon purple">🕐</div><div class="card-title">Horaires Intervention</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div><label class="form-label">Heure arrivée *</label><div style="display:flex;gap:8px"><input type="time" class="form-input" id="btHeureArrivee" style="flex:1"><button type="button" class="btn btn-secondary" onclick="setCurrentTime('btHeureArrivee')" style="padding:12px">⏱️</button></div></div>
+<div><label class="form-label">Heure fin *</label><div style="display:flex;gap:8px"><input type="time" class="form-input" id="btHeureFin" style="flex:1"><button type="button" class="btn btn-secondary" onclick="setCurrentTime('btHeureFin')" style="padding:12px">⏱️</button></div></div>
+</div>
+</div>
+<div class="form-group"><label class="form-label">Commentaire</label><textarea class="form-textarea" id="statutComment" placeholder="Optionnel..."></textarea></div>
+<div class="validation-info" id="validationInfo">⚠️ Validation réservée au <strong>Chef d'équipe</strong></div>
+<button class="btn btn-success" style="width:100%;margin-top:16px" id="btnSaveStatut">💾 Valider</button>
+</div>
+</div>
+<div class="modal" id="modalBT">
+<div class="modal-content">
+<div class="modal-header"><h3>📄 Détail BT</h3><button class="modal-close" onclick="closeModal('modalBT')">✕</button></div>
+<div id="modalBTContent"></div>
+</div>
+</div>
+<div class="modal" id="modalDI">
+<div class="modal-content">
+<div class="modal-header"><h3>📋 Détail DI</h3><button class="modal-close" onclick="closeModal('modalDI')">✕</button></div>
+<div id="modalDIContent"></div>
+</div>
+</div>
+<div class="modal" id="modalEditDI">
+<div class="modal-content">
+<div class="modal-header"><h3>✏️ Modifier DI</h3><button class="modal-close" onclick="closeModal('modalEditDI')">✕</button></div>
+<div class="form-group"><label class="form-label">Ligne</label><select class="form-select" id="editDILigne"></select></div>
+<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="editDIMachine"></select></div>
+<div class="form-group"><label class="form-label">Zone</label><select class="form-select" id="editDIZone"></select></div>
+<div class="form-group"><label class="form-label">Composant</label><select class="form-select" id="editDIComposant"></select></div>
+<div class="form-group"><label class="form-label">Anomalie</label><select class="form-select" id="editDIAnomalie"></select></div>
+<div class="form-group"><label class="form-label">Commentaire</label><textarea class="form-textarea" id="editDIComment" placeholder="Commentaire..."></textarea></div>
+<button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="saveEditDI()">💾 Sauvegarder</button>
+</div>
+</div>
+<div class="modal" id="modalEditBT">
+<div class="modal-content">
+<div class="modal-header"><h3>✏️ Modifier BT</h3><button class="modal-close" onclick="closeModal('modalEditBT')">✕</button></div>
+<div class="bt-card" id="editBTInfo"></div>
+<div class="form-group"><label class="form-label">Cause</label><select class="form-select" id="editBTCause"><option value="">-- Sélectionner --</option><option>Usure normale</option><option>Défaut matériel</option><option>Erreur opérateur</option><option>Manque maintenance</option><option>Autre</option></select></div>
+<div class="form-group"><label class="form-label">Diagnostic</label><textarea class="form-textarea" id="editBTDiag" placeholder="Diagnostic..."></textarea></div>
+<div class="form-group"><label class="form-label">Type action</label><select class="form-select" id="editBTAction"><option value="">-- Sélectionner --</option><option>Correctif</option><option>Préventif</option><option>Amélioratif</option></select></div>
+<div class="form-group"><label class="form-label">Détail action</label><textarea class="form-textarea" id="editBTDetail" placeholder="Action réalisée..."></textarea></div>
+<div class="form-group"><label class="form-label">Pièces utilisées</label><textarea class="form-textarea" id="editBTPieces" placeholder="Ex: Joint torique x2..."></textarea></div>
+<button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="saveEditBT()">💾 Sauvegarder</button>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
